@@ -12,7 +12,6 @@ export default class Conversor extends Component{
             coinB_value: 0,
             coinA_type: "USD",
             coinB_type: "BRL",
-            //graph: "",
         }
 
         this.converter = this.converter.bind(this);
@@ -46,20 +45,28 @@ export default class Conversor extends Component{
 
         switch(graph){
             case '1D':
-                dateStart = dateEnd.minus({ days: 1 }).toFormat('yyyyMMdd');
+                dateStart = dateEnd.minus({ days: 1 });
                 dateAmount  = 24;
+                dateStart = dateStart.toFormat('yyyyMMdd');
+                dateEnd = dateEnd.toFormat('yyyyMMdd');
                 break;
             case '3D':
-                dateStart = dateEnd.minus({ days: 3 }).toFormat('yyyyMMdd');
+                dateStart = dateEnd.minus({ days: 3 });
                 dateAmount = 48
+                dateStart = dateStart.toFormat('yyyyMMdd');
+                dateEnd = dateEnd.toFormat('yyyyMMdd');
                 break;
             case '7D':
-                dateStart = dateEnd.minus({ days: 7 }).toFormat('yyyyMMdd');
-                dateAmount = 39;
+                dateStart = dateEnd.minus({ days: 7 });
+                dateAmount = 28;
+                dateStart = dateStart.toFormat('yyyyMMdd');
+                dateEnd = dateEnd.toFormat('yyyyMMdd');
                 break;
             case '15D':
-                dateStart = dateEnd.minus({ days: 15 }).toFormat('yyyyMMdd');
+                dateStart = dateEnd.minus({ days: 15 });
                 dateAmount = 30;
+                dateStart = dateStart.toFormat('yyyyMMdd');
+                dateEnd = dateEnd.toFormat('yyyyMMdd');
                 break;
             case '1M':
                 dateStart = dateEnd.minus({ month: 1 });
@@ -103,41 +110,20 @@ export default class Conversor extends Component{
                 console.log('default');
         }
 
-        const dateUrl = `https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`
+        //const loopData = [];
+        fetch(`https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`)
+        .then( res => {
+            console.log(res);
+            res.json()
+            .then(data => {
+                console.log(data.map((e) => DateTime.fromSeconds(Number(e.timestamp)).toISO()))
+                //loopData = (data.map((e) => e.high))
+            })
+        }).catch((error) => {
+            console.log("Erro na promise");
+        });
 
-        fetch(dateUrl)
-        .then(res=>{
-            return res.json()
-        }).then(json=>{
-            //const high = json[dateUrl].high;
-        })
-        console.log(dateUrl);
     }
-
-    /* Planejar: Como colocar no grafico
-
-    1. Identificar como os valores trabalham dentro da API
-        a. Qual o formato da data?
-            R: Formato americano/ingles (YYYYMMDD).
-        b. Esses dados vem em formato de array? Ou objeto? Será que precisa usar ObjectKeys?
-            R: Vem todos em array, definidos pela quantia desejada.
-        c. Como criar um Array contendo: O valor da alta.
-
-    2. Recebendo dados da API.
-        a. Criar estados para armazenar os dados.
-        b. Criar a função para receber os dados (formatar os dados para aplicar no gráfico).
-        c. Criar a logica de aplicar o item 'b' no item 'a'.
-
-    3. Criando Chart
-        a. Instalando o Chart.js
-        b. Criar um modelo de exemplo, sem usar os dados da API.
-        c. Modificar o exemplo para que inicie no mesmo dia do Start-Date da API.
-        d. Modificar o exemplo para que use os dados da API.
-
-    4. Criar a logica de botão para trocar o Start-Date
-
-
-    */
 
     render() {
         const options = this.props.options;
@@ -207,10 +193,6 @@ export default class Conversor extends Component{
 
                     </div>
 
-
-                    <div id="graph">
-
-                    </div>
                 </div>
 
             </div>

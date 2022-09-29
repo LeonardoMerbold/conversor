@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import './Conversor.css';
 
 export default class Randomize extends Component{
 

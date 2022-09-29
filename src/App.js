@@ -1,13 +1,13 @@
-import { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import './App.css';
-
+// import BarChart from './components/BarChart';
 import Conversor from './components/Conversor';
 
 function App() {
 
   const [options, setOptions] = useState(null);
 
-  const req2 = async () => {
+  const reqAcurrency = async () => {
 
     const APIResponse = await fetch("https://economia.awesomeapi.com.br/json/available/uniq");
 
@@ -16,11 +16,11 @@ function App() {
         return data;
     }
 }
-  //console.log(req2())
+  //console.log(reqAcurrency())
 
   const fetchOptions = useCallback(async () => {
     try {
-      const data = await (req2())
+      const data = await (reqAcurrency())
       setOptions(data);
 
       // desenvolver minha funcao pra dar fetch aqui e atribuir ao setOptions
@@ -40,7 +40,9 @@ function App() {
   return (
     <div className="App">
       <Conversor options={options} />
+      {/* <BarChart /> */}
     </div>
+
   );
 }
 
