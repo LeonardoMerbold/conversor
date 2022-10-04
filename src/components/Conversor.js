@@ -1,6 +1,19 @@
 import React, { Component } from 'react';
-import { DateTime } from 'luxon';
 import './Conversor.css';
+import { DateTime } from 'luxon';
+import { Chart as ChartJS } from 'chart.js/auto';
+import {Line} from 'react-chartjs-2';
+
+// const [userData, setUserData] = useState({
+//     labels: UserData.map((data) => data.year),
+//     datasets: [{
+//       label: "Toletão",
+//       data: UserData.map((data) => data.userGain),
+//       backgroundColor: ["green"],
+//       borderColor: "black",
+//       borderWidth: 1,
+//     }]
+//   })
 
 export default class Conversor extends Component{
 
@@ -12,6 +25,7 @@ export default class Conversor extends Component{
             coinB_value: 0,
             coinA_type: "USD",
             coinB_type: "BRL",
+            APIGraph: null,
         }
 
         this.converter = this.converter.bind(this);
@@ -39,7 +53,7 @@ export default class Conversor extends Component{
 
     season(graph) {
         let dateEnd = DateTime.now().setZone("system");
-        let dateStart = 0, dateAmount = 0, diff = 0;
+        let dateStart = 0, dateAmount = 0, diff = 0, infoData = [];
         //console.log(this.state.graph);
         //console.log(this.dateEnd);
 
@@ -82,8 +96,8 @@ export default class Conversor extends Component{
                 dateStart = dateStart.toFormat('yyyyMMdd');
                 dateEnd = dateEnd.toFormat('yyyyMMdd');
                 break;
-             case '6M':
-                dateStart = dateEnd.minus({ month: 6 });
+             case '5M':
+                dateStart = dateEnd.minus({ month: 5 });
                 diff = dateEnd.diff(dateStart, 'days');
                 dateAmount = diff.values.days;
                 dateStart = dateStart.toFormat('yyyyMMdd');
@@ -111,18 +125,36 @@ export default class Conversor extends Component{
         }
 
         //const loopData = [];
-        fetch(`https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`)
+
+        //fetch(`https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`)
+        fetch(`https://economia.awesomeapi.com.br/json/daily/USD-BRL/5`)
         .then( res => {
-            console.log(res);
+            //console.log(res);
             res.json()
             .then(data => {
-                console.log(data.map((e) => DateTime.fromSeconds(Number(e.timestamp)).toISO()))
-                //loopData = (data.map((e) => e.high))
+                //console.log(data.map((e) => DateTime.fromSeconds(Number(e.timestamp)).toISO()))
+                infoData = (data.map((e) => e.high))
+                console.log("Resultados das altas tragas da API", infoData);
             })
         }).catch((error) => {
             console.log("Erro na promise");
         });
 
+        const APIGraph = {
+            labels: ['January', 'February', 'March',
+                    'April', 'May'],
+            datasets: [{
+                label: 'Conversão',
+                fill: false,
+                lineTension: 0,
+                backgroundColor: 'rgba(31,240,75,1)',
+                borderColor: 'rgba(31,240,75,1)',
+                borderWidth: 2,
+                //data: [infoData]
+            }]
+        }
+        this.setState({APIGraph});
+        console.log(APIGraph.datasets.data);
     }
 
     render() {
@@ -185,7 +217,7 @@ export default class Conversor extends Component{
 
                         <button onClick={() => { this.season('3M') }}>3M</button>
 
-                        <button onClick={() => { this.season('6M') }}>6M</button>
+                        <button onClick={() => { this.season('5M') }}>5M</button>
 
                         <button onClick={() => { this.season('1A') }}>1A</button>
 
@@ -195,6 +227,24 @@ export default class Conversor extends Component{
 
                 </div>
 
+                <div>
+                    { this.state.APIGraph !== null ? (
+                        <Line
+                        data={this.state.APIGraph}
+                        // options={{
+                        //     title:{
+                        //     display:true,
+                        //     text:'Average Rainfall per month',
+                        //     fontSize:20,
+                        //     },
+                        //     legend:{
+                        //     display:true,
+                        //     position:'right'
+                        //     }
+                        // }}
+                    />)
+                    : <h3> Errou! </h3>}
+                </div>
             </div>
         )
     }

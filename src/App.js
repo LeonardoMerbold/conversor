@@ -1,7 +1,7 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import './App.css';
-// import BarChart from './components/BarChart';
 import Conversor from './components/Conversor';
+
 
 function App() {
 
@@ -37,10 +37,10 @@ function App() {
   if(options === null){
     return <h1>loading...</h1>
   }
+
   return (
     <div className="App">
-      <Conversor options={options} />
-      {/* <BarChart /> */}
+        <Conversor options={options} />
     </div>
 
   );
