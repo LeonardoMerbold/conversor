@@ -110,6 +110,8 @@ export default class Conversor extends Component{
                 case '5A':
                     dateStart = dateEnd.minus({ year: 5 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+
+                    dateStart = dateEnd.minus({ days: 1 })
                     a = dateEnd;
                     b = dateEnd.minus({ days: 1 });
                     dateStart = dateStart.toFormat('yyyyMMdd');
@@ -126,6 +128,7 @@ export default class Conversor extends Component{
                     .then( (e) => e.json()
                             .then( data => {
                                 ( graph === '1H' ? resData = ( data.map((e) => e.bid )) : resData = ( data.map((e) => e.high )))
+
                                 const APIGraph = {
                                     labels: data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a')),
                                     datasets: [{
@@ -140,28 +143,82 @@ export default class Conversor extends Component{
                                     }]
                                 }
                                 this.setState({APIGraph});
+
                             })
                         )
 
             }else if( graph === '5A' ){
-                let result = [];
+                let urls = [];
+                let texts = [];
                 let promises = [];
+                const Zcode = [];
 
                 for( let i = 1 ; i <= 100 ; i++){
-                    promises.push(fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`))
-                    console.log(promises)
+                    // promises.push(fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`))
+                    // console.log(i, promises)
+                    fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`)
+
+                    .then( (e) => e.json()
+                        .then( data => {
+                            const Zcode = (i, data.map((e) => e.high ))
+                            //console.log(i, data.map((e) => e.high ));
+                            console.log(i, Zcode);
+                        })
+                    )
+                    //console.log(i, Zcode);
 
                     dateEnd = a.minus({ days: i });
                     dateStart = b.minus({ days: i });
                     dateStart = dateStart.toFormat('yyyyMMdd');
                     dateEnd = dateEnd.toFormat('yyyyMMdd');
+
+                    // Promise.all(urls.map(u => fetch(u))).then(responses =>
+                    //     Promise.all(responses.map(res => res.text()))
+                    // ).then(texts => {
+                    //     console.log(texts)
+                    // })
                 }
 
-                const data = await Promise.all(promises);
-                //console.log('foi:', data)
-                data.forEach(({ data }) => {
-                        result = [...result, data];
-                });
+                // Promise.all(promises.map( (e) => e.json() )
+                //     .then( data => {
+                //         resData = ( data.map((e) => e.high ));
+                //         console.log(resData);
+                //     })
+                // )
+
+                //     .then((e) => e.json())
+                //     .then( await (data => {
+                //         promises = (data.map((e) => e.high))
+                //         console.log(i, promises)
+                //      }))
+                // }
+
+                // Promise.all(promises)
+
+                // await fetch(z)
+                // .then((e) => e.json())
+                //      .then( await (data => {
+                //          const teste = (data.map((e) => e.high))
+
+                // //        console.log(teste)
+                // // //console.log(data)
+                //      }))
+                // )
+
+
+
+
+                // .then(data => {
+                //     data.forEach( data => data.text()).then( t => result.push(t))
+                //     console.log(data)
+                // })
+
+
+
+
+                // data.forEach(({ data }) => {
+                //         result = [...result, data];
+                // });
 
                 //console.log('array cheio: ', result);
 
@@ -170,6 +227,9 @@ export default class Conversor extends Component{
                     .then( (e) => e.json()
                         .then( data => {
                             resData = ( data.map((e) => e.high ));
+                            resData = resData.map(str => {
+                                return Number(str).toFixed(2);
+                            })
                             const APIGraph = {
                                 labels: data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy')),
                                 datasets: [{
@@ -185,6 +245,7 @@ export default class Conversor extends Component{
                             }
                             this.setState({APIGraph});
                         })
+
                     )
             }
 
