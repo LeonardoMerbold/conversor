@@ -38,16 +38,27 @@ export default class Conversor extends Component{
         }
     }
 
+    // swap(){
+    //     let aux;
+    //     const coinB_value, coinA_value;
+    //     aux = coinB_value;
+    //     coinB_value = coinA_value;
+    //     coinA_value = aux;
+
+    //     this.setState ({ coinA_value, coinB_value})
+    // }
+
     async season(graph) {
 
         try {
             let dateEnd = DateTime.now().setZone("system");
             let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', a = 0, b = 0;
+            let resData = [];
 
             switch(graph){
                 case '1H':
                     dateStart = dateEnd.minus({ days: 1 });
-                    dateAmount  = 55;
+                    dateAmount  = 54;
                     dateStart = dateStart.toFormat('yyyyMMdd');
                     dateEnd = dateEnd.toFormat('yyyyMMdd');
                     graphColor1 = 'rgb(255,255,255)';
@@ -80,32 +91,22 @@ export default class Conversor extends Component{
                 case '15D':
                     dateStart = dateEnd.minus({ days: 15 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    graphColor1 = 'rgb(247,60,41)';
-                    graphColor2 = 'rgb(247,60,41,0.2)';
                     break;
                 case '1M':
                     dateStart = dateEnd.minus({ month: 1 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    graphColor1 = 'rgb(95,255,76)';
-                    graphColor2 = 'rgba(95,255,76,0.2)';
                     break;
                 case '3M':
                     dateStart = dateEnd.minus({ month: 3 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    graphColor1 = 'rgb(41,186,227)';
-                    graphColor2 = 'rgb(41,186,227,0.2)';
                     break;
                 case '6M':
                     dateStart = dateEnd.minus({ month: 6 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    graphColor1 = 'rgb(210,194,45)';
-                    graphColor2 = 'rgb(210,194,45,0.2)';
                     break;
                 case '1A':
                     dateStart = dateEnd.minus({ year: 1 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    graphColor1 = 'rgb(247,126,126)';
-                    graphColor2 = 'rgba(247,126,126,0.2)';
                     break;
                 case '5A':
                     dateStart = dateEnd.minus({ year: 5 });
@@ -120,8 +121,6 @@ export default class Conversor extends Component{
                 default:
                     console.log('Use os valores válidos!');
             }
-
-            let resData;
 
             if(graph === '1H' || graph === '1D' || graph === '3D' || graph === '7D'){
                 fetch(`https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`)
@@ -153,7 +152,7 @@ export default class Conversor extends Component{
                 let promises = [];
                 const Zcode = [];
 
-                for( let i = 1 ; i <= 100 ; i++){
+                for( let i = 1 ; i <= 30 ; i++){
                     // promises.push(fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`))
                     // console.log(i, promises)
                     fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`)
@@ -223,15 +222,39 @@ export default class Conversor extends Component{
                 //console.log('array cheio: ', result);
 
             }else{
+                let newData = [], average = 0, total= 0.0;
                 fetch(`https://economia.awesomeapi.com.br/json/daily/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}`)
                     .then( (e) => e.json()
                         .then( data => {
-                            resData = ( data.map((e) => e.high ));
+                            newData.push(data[0]);
+                            for(let i = 0 ; i < data.length-1 ; i++){
+                                (data[i].timestamp - data[i+1].timestamp > 1000 ? newData.push(data[i+1]) : console.log());//i+1, 'é referente ao mesmo dia. Será removido do array!!'));
+                            }
+                            //console.log(data)
+                            //console.log(newData)
+                            for(let i = 0 ; i < newData.length ; i++){
+                                total += Number(newData[i].high);
+                            }
+                            average = (total/newData.length).toFixed(3)
+                            //console.log(newData[newData.length-1].high)
+
+                            if(newData[newData.length-1].high > average){
+                                console.log('Média:', average, ' >>>>> Ultimo:', newData[0].high)
+                                graphColor1 = 'rgb(95,255,76)';
+                                graphColor2 = 'rgba(95,255,76,0.2)';
+                            }else{
+                                console.log('Média:', average, ' <<<<< Ultimo:', newData[0].high)
+                                graphColor1 = 'rgb(247,126,126)';
+                                graphColor2 = 'rgba(247,126,126,0.2)';
+                            }
+
+                            resData = ( newData.map((e) => e.high ));
                             resData = resData.map(str => {
                                 return Number(str).toFixed(2);
                             })
+
                             const APIGraph = {
-                                labels: data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy')),
+                                labels: newData.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy')),
                                 datasets: [{
                                     label: 'Conversão',
                                     fill: true,
@@ -245,10 +268,7 @@ export default class Conversor extends Component{
                             }
                             this.setState({APIGraph});
                         })
-
-                    )
-            }
-
+                    )}
         } catch(error) {
             console.log(error);
         }
@@ -282,6 +302,9 @@ export default class Conversor extends Component{
                     </select>
                 </div>
 
+                {/* <div>
+                    <button onClick={() => { this.swap('swap') }}>Trocar</button>
+                </div> */}
 
                 <div id="currency:2">
 
