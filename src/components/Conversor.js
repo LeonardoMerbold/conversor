@@ -35,25 +35,33 @@ export default class Conversor extends Component{
         } else {
             const coinB_value = (parseFloat(this.state.coinA_value) * quotation).toFixed(2)
             this.setState({ coinB_value })
+            //console.log('Moeda B recebe:', coinB_value)
         }
     }
 
-    // swap(){
-    //     let aux;
-    //     const coinB_value, coinA_value;
-    //     aux = coinB_value;
-    //     coinB_value = coinA_value;
-    //     coinA_value = aux;
+    swap(){
+        let aux, coinA_type, coinB_type;
 
-    //     this.setState ({ coinA_value, coinB_value})
-    // }
+        aux = this.state.coinB_type;
+        coinB_type = this.state.coinA_type;
+        coinA_type = aux;
+        // let z = event => {
+        //     event.target.setAttribute(this.state.coinB_value, this.state.coinA_value);
+        // }
+        // console.log(this.state.coinB_value)
+        
+        //console.log('meu swap', coinA_type,  coinB_type, aux)
+        this.converter();
+        //console.log(this.converter()) // promessa pendente
+
+        this.setState ({ coinA_type, coinB_type });
+    }
 
     async season(graph) {
 
         try {
             let dateEnd = DateTime.now().setZone("system");
-            let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', a = 0, b = 0;
-            let resData = [];
+            let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', a = 0, b = 0, url = '', resData = [], newData = [],average = 0, total= 0.0;
 
             switch(graph){
                 case '1H':
@@ -63,30 +71,6 @@ export default class Conversor extends Component{
                     dateEnd = dateEnd.toFormat('yyyyMMdd');
                     graphColor1 = 'rgb(255,255,255)';
                     graphColor2 = 'rgba(240,240,240,0.2)';
-                    break;
-                case '1D':
-                    dateStart = dateEnd.minus({ days: 1 });
-                    dateAmount  = 90;
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-                    graphColor1 = 'rgb(160,194,0)';
-                    graphColor2 = 'rgba(160,194,0,0.2)';
-                    break;
-                case '3D':
-                    dateStart = dateEnd.minus({ days: 3 });
-                    dateAmount = 90;
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-                    graphColor1 = 'rgb(213,187,250)';
-                    graphColor2 = 'rgba(213,187,250,0.2)';
-                    break;
-                case '7D':
-                    dateStart = dateEnd.minus({ days: 7 });
-                    dateAmount = 90;
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-                    graphColor1 = 'rgb(245,164,51)';
-                    graphColor2 = 'rgba(245,164,51,0.2)';
                     break;
                 case '15D':
                     dateStart = dateEnd.minus({ days: 15 });
@@ -122,116 +106,24 @@ export default class Conversor extends Component{
                     console.log('Use os valores válidos!');
             }
 
-            if(graph === '1H' || graph === '1D' || graph === '3D' || graph === '7D'){
-                fetch(`https://economia.awesomeapi.com.br/USD-BRL/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}`)
-                    .then( (e) => e.json()
-                            .then( data => {
-                                ( graph === '1H' ? resData = ( data.map((e) => e.bid )) : resData = ( data.map((e) => e.high )))
+            (graph === '1H' ? url = `https://economia.awesomeapi.com.br/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}`)
 
-                                const APIGraph = {
-                                    labels: data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a')),
-                                    datasets: [{
-                                        label: 'Em teste...',
-                                        fill: true,
-                                        lineTension: 0,
-                                        backgroundColor: graphColor2,
-                                        borderColor: graphColor1,
-                                        hoverBackgroundColor: 'rgb(0,0,0)',
-                                        borderWidth: 2,
-                                        data: resData.reverse()
-                                    }]
-                                }
-                                this.setState({APIGraph});
-
-                            })
-                        )
-
-            }else if( graph === '5A' ){
-                let urls = [];
-                let texts = [];
-                let promises = [];
-                const Zcode = [];
-
-                for( let i = 1 ; i <= 30 ; i++){
-                    // promises.push(fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`))
-                    // console.log(i, promises)
-                    fetch(`https://economia.awesomeapi.com.br/USD-BRL/1?start_date=${dateStart}&end_date=${dateEnd}`)
-
-                    .then( (e) => e.json()
-                        .then( data => {
-                            const Zcode = (i, data.map((e) => e.high ))
-                            //console.log(i, data.map((e) => e.high ));
-                            console.log(i, Zcode);
-                        })
-                    )
-                    //console.log(i, Zcode);
-
-                    dateEnd = a.minus({ days: i });
-                    dateStart = b.minus({ days: i });
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-
-                    // Promise.all(urls.map(u => fetch(u))).then(responses =>
-                    //     Promise.all(responses.map(res => res.text()))
-                    // ).then(texts => {
-                    //     console.log(texts)
-                    // })
-                }
-
-                // Promise.all(promises.map( (e) => e.json() )
-                //     .then( data => {
-                //         resData = ( data.map((e) => e.high ));
-                //         console.log(resData);
-                //     })
-                // )
-
-                //     .then((e) => e.json())
-                //     .then( await (data => {
-                //         promises = (data.map((e) => e.high))
-                //         console.log(i, promises)
-                //      }))
-                // }
-
-                // Promise.all(promises)
-
-                // await fetch(z)
-                // .then((e) => e.json())
-                //      .then( await (data => {
-                //          const teste = (data.map((e) => e.high))
-
-                // //        console.log(teste)
-                // // //console.log(data)
-                //      }))
-                // )
-
-
-
-
-                // .then(data => {
-                //     data.forEach( data => data.text()).then( t => result.push(t))
-                //     console.log(data)
-                // })
-
-
-
-
-                // data.forEach(({ data }) => {
-                //         result = [...result, data];
-                // });
-
-                //console.log('array cheio: ', result);
-
-            }else{
-                let newData = [], average = 0, total= 0.0;
-                fetch(`https://economia.awesomeapi.com.br/json/daily/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}`)
-                    .then( (e) => e.json()
-                        .then( data => {
+            fetch(url)
+                .then( (e) => e.json()
+                    .then( data => {
+                        if(graph === '1H'){
+                            resData = ( data.map((e) => e.bid ))
+                            newData = data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
+                        }else{
+                            resData = ( data.map((e) => e.high ));
                             newData.push(data[0]);
+
                             for(let i = 0 ; i < data.length-1 ; i++){
-                                (data[i].timestamp - data[i+1].timestamp > 1000 ? newData.push(data[i+1]) : console.log());//i+1, 'é referente ao mesmo dia. Será removido do array!!'));
+                                (data[i].timestamp - data[i+1].timestamp > 1000 ? newData.push(data[i+1]) : console.log());//i+1, 'é referente ao mesmo dia. a duplicata será removida do array!!'));
                             }
                             //console.log(data)
                             //console.log(newData)
+
                             for(let i = 0 ; i < newData.length ; i++){
                                 total += Number(newData[i].high);
                             }
@@ -250,25 +142,33 @@ export default class Conversor extends Component{
 
                             resData = ( newData.map((e) => e.high ));
                             resData = resData.map(str => {
-                                return Number(str).toFixed(2);
-                            })
+                                return parseFloat(str).toFixed(3)
+                                // if(resData[1] < 1){
+                                //     return Number(str).toFixed(3);
+                                // }else{
+                                //     return Number(str).toFixed(2);
+                                // }
 
-                            const APIGraph = {
-                                labels: newData.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy')),
-                                datasets: [{
-                                    label: 'Conversão',
-                                    fill: true,
-                                    lineTension: 0,
-                                    backgroundColor: graphColor2,
-                                    borderColor: graphColor1,
-                                    hoverBackgroundColor: 'rgb(0,0,0)',
-                                    borderWidth: 2,
-                                    data: resData.reverse()
-                                }]
-                            }
-                            this.setState({APIGraph});
-                        })
-                    )}
+                            })
+                            newData = newData.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
+                        }
+
+                        const APIGraph = {
+                            labels: newData,
+                            datasets: [{
+                                label: 'Conversão',
+                                fill: true,
+                                lineTension: 0,
+                                backgroundColor: graphColor2,
+                                borderColor: graphColor1,
+                                hoverBackgroundColor: 'rgb(0,0,0)',
+                                borderWidth: 2,
+                                data: resData.reverse()
+                            }]
+                        }
+                        this.setState({APIGraph});
+                    })
+                )
         } catch(error) {
             console.log(error);
         }
@@ -289,7 +189,8 @@ export default class Conversor extends Component{
                         onInput={
                             (event) => {
                                 let valorInput = event.target.value;
-                                this.setState({ coinA_value: valorInput});
+                                this.setState({ coinA_value: valorInput });
+                                //console.log( this.state.coinA_value );
                                 this.converter();
                             }
                         }
@@ -302,9 +203,9 @@ export default class Conversor extends Component{
                     </select>
                 </div>
 
-                {/* <div>
-                    <button onClick={() => { this.swap('swap') }}>Trocar</button>
-                </div> */}
+                <div>
+                    <button onClick={() => { this.swap() }}>Trocar</button>
+                </div>
 
                 <div id="currency:2">
 
@@ -324,12 +225,6 @@ export default class Conversor extends Component{
 
                         <button onClick={() => { this.season('1H') }}>Last Hour</button>
 
-                        <button onClick={() => { this.season('1D') }}>1D</button>
-
-                        <button onClick={() => { this.season('3D') }}>3D</button>
-
-                        <button onClick={() => { this.season('7D') }}>7D</button>
-
                         <button onClick={() => { this.season('15D') }}>15D</button>
 
                         <button onClick={() => { this.season('1M') }}>1M</button>
@@ -339,8 +234,6 @@ export default class Conversor extends Component{
                         <button onClick={() => { this.season('6M') }}>6M</button>
 
                         <button onClick={() => { this.season('1A') }}>1A</button>
-
-                        <button onClick={() => { this.season('5A') }}>5A</button>
 
                     </div>
 
