@@ -15,12 +15,13 @@ export default class Conversor extends Component{
             coinA_type: "USD",
             coinB_type: "BRL",
             APIGraph: null,
+            graphMode: false,
+            hc: '',
         }
 
         this.converter = this.converter.bind(this);
         this.season = this.season.bind(this);
     }
-
 
     async converter() {
         const from_to = `${this.state.coinA_type}${this.state.coinB_type}`
@@ -35,33 +36,36 @@ export default class Conversor extends Component{
         } else {
             const coinB_value = (parseFloat(this.state.coinA_value) * quotation).toFixed(2)
             this.setState({ coinB_value })
-            //console.log('Moeda B recebe:', coinB_value)
         }
     }
 
     swap(){
         let aux, coinA_type, coinB_type;
 
+        //console.log(graph)
+
         aux = this.state.coinB_type;
         coinB_type = this.state.coinA_type;
         coinA_type = aux;
-        // let z = event => {
-        //     event.target.setAttribute(this.state.coinB_value, this.state.coinA_value);
-        // }
-        // console.log(this.state.coinB_value)
-        
-        //console.log('meu swap', coinA_type,  coinB_type, aux)
-        this.converter();
-        //console.log(this.converter()) // promessa pendente
 
-        this.setState ({ coinA_type, coinB_type });
+        this.setState ({ coinA_type, coinB_type }, () => {
+            this.converter();
+
+            // if (this.graphMode === true) {
+            //     console.log("Gráfico ativo, chamar função Season!!");
+            //     //this.season();
+            // }else{
+            //     console.log('Não há gráfico')
+            // }
+        });
     }
 
     async season(graph) {
-
         try {
             let dateEnd = DateTime.now().setZone("system");
-            let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', a = 0, b = 0, url = '', resData = [], newData = [],average = 0, total= 0.0;
+            let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', url = '', resData = [], newData = [],average = 0;
+
+            this.graphMode = true;
 
             switch(graph){
                 case '1H':
@@ -92,18 +96,8 @@ export default class Conversor extends Component{
                     dateStart = dateEnd.minus({ year: 1 });
                     dateAmount = dateEnd.diff(dateStart, 'days').values.days;
                     break;
-                case '5A':
-                    dateStart = dateEnd.minus({ year: 5 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-
-                    dateStart = dateEnd.minus({ days: 1 })
-                    a = dateEnd;
-                    b = dateEnd.minus({ days: 1 });
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-                    break;
                 default:
-                    console.log('Use os valores válidos!');
+                    alert('Atenção: Use apenas os valores válidos!');
             }
 
             (graph === '1H' ? url = `https://economia.awesomeapi.com.br/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}`)
@@ -115,40 +109,39 @@ export default class Conversor extends Component{
                             resData = ( data.map((e) => e.bid ))
                             newData = data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
                         }else{
-                            resData = ( data.map((e) => e.high ));
-                            newData.push(data[0]);
+                            resData = data.map((e) => e.high );
+                            newData.push( data[0] );
 
                             for(let i = 0 ; i < data.length-1 ; i++){
-                                (data[i].timestamp - data[i+1].timestamp > 1000 ? newData.push(data[i+1]) : console.log());//i+1, 'é referente ao mesmo dia. a duplicata será removida do array!!'));
+                                if(data[i].timestamp - data[i+1].timestamp > 1000){
+                                    newData.push(data[i+1]);
+                                }
                             }
                             //console.log(data)
                             //console.log(newData)
 
-                            for(let i = 0 ; i < newData.length ; i++){
-                                total += Number(newData[i].high);
-                            }
-                            average = (total/newData.length).toFixed(3)
+                            const total = newData.reduce( (prev, curr) => prev + Number(curr.high), 0)
+
+                            average = (total/newData.length).toFixed(4)
                             //console.log(newData[newData.length-1].high)
 
                             if(newData[newData.length-1].high > average){
-                                console.log('Média:', average, ' >>>>> Ultimo:', newData[0].high)
+                                //console.log('Média:', average, ' >>>>> Ultimo:', newData[0].high)
                                 graphColor1 = 'rgb(95,255,76)';
                                 graphColor2 = 'rgba(95,255,76,0.2)';
                             }else{
-                                console.log('Média:', average, ' <<<<< Ultimo:', newData[0].high)
+                                //console.log('Média:', average, ' <<<<< Ultimo:', newData[0].high)
                                 graphColor1 = 'rgb(247,126,126)';
                                 graphColor2 = 'rgba(247,126,126,0.2)';
                             }
 
                             resData = ( newData.map((e) => e.high ));
                             resData = resData.map(str => {
-                                return parseFloat(str).toFixed(3)
-                                // if(resData[1] < 1){
-                                //     return Number(str).toFixed(3);
-                                // }else{
-                                //     return Number(str).toFixed(2);
-                                // }
-
+                                if(resData[0] < 1){
+                                    return Number(str).toFixed(4);
+                                }else{
+                                    return Number(str).toFixed(2);
+                                }
                             })
                             newData = newData.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
                         }
@@ -159,11 +152,19 @@ export default class Conversor extends Component{
                                 label: 'Conversão',
                                 fill: true,
                                 lineTension: 0,
+                                cubicInterpolationMode: 'monotone',
+                                pointHitRadius: 8,
+                                pointHoverBorderWidth: 4.5,
+                                pointRadius: 0,
+                                //pointBorderWidth: 2,
+                                pointHoverRadius: 6,
                                 backgroundColor: graphColor2,
                                 borderColor: graphColor1,
-                                hoverBackgroundColor: 'rgb(0,0,0)',
+                                pointHoverBackgroundColor: 'rgb(0,0,0)',
+                                pointBorderColor: graphColor1,
+                                pointBackgroundColor: graphColor1,
                                 borderWidth: 2,
-                                data: resData.reverse()
+                                data: resData.reverse(),
                             }]
                         }
                         this.setState({APIGraph});
@@ -204,7 +205,7 @@ export default class Conversor extends Component{
                 </div>
 
                 <div>
-                    <button onClick={() => { this.swap() }}>Trocar</button>
+                    <button onClick={() => { this.swap() }}>Inverter</button>
                 </div>
 
                 <div id="currency:2">
@@ -212,7 +213,10 @@ export default class Conversor extends Component{
                     <input disabled value={this.state.coinB_value}></input>
                     <select value={this.state.coinB_type} onChange={(event) => {this.setState({ coinB_type: event.target.value })}} id="converted">
                         {listOfSiglas.map((key) => {
-                            return (<option value={key} key={key+"converted"}>{options[key]}</option>)
+                            if(key === 'USD' || key === 'BRL' || key === 'EUR'){
+                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
+                            }
+
                         })}
                     </select>
                 </div>
@@ -223,7 +227,7 @@ export default class Conversor extends Component{
 
                     <div id="graph-buttons">
 
-                        <button onClick={() => { this.season('1H') }}>Last Hour</button>
+                        <button onClick={() => { this.season('1H') }}>1H</button>
 
                         <button onClick={() => { this.season('15D') }}>15D</button>
 
@@ -240,22 +244,7 @@ export default class Conversor extends Component{
                 </div>
 
                 <div>
-                    { this.state.APIGraph !== null ? (
-                        <Line
-                        data={this.state.APIGraph}
-                        // options={{
-                        //     title:{
-                        //         display:false,
-                        //         text:'Average Rainfall per month',
-                        //         fontSize:20,
-                        //     },
-                        //     legend:{
-                        //         display:true,
-                        //         position:'right'
-                        //     }
-                        // }}
-                    />)
-                    : <h4> Aguardando Gráfico... </h4>}
+                    { this.state.APIGraph !== null ? (<Line data={this.state.APIGraph} />) : <h4> Aguardando Gráfico... </h4>}
                 </div>
             </div>
         )

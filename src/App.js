@@ -16,16 +16,14 @@ function App() {
         return data;
     }
 }
-  //console.log(reqAcurrency())
 
   const fetchOptions = useCallback(async () => {
     try {
       const data = await (reqAcurrency())
       setOptions(data);
 
-      // desenvolver minha funcao pra dar fetch aqui e atribuir ao setOptions
      } catch (ex) {
-      // Caso der erro, atribuir um array vazio as opcoes, para sair do Loading
+
       setOptions({});
     }
   }, [setOptions]);
@@ -35,7 +33,7 @@ function App() {
   }, [fetchOptions])
 
   if(options === null){
-    return <h1>loading...</h1>
+    return <h1>Loading...</h1>
   }
 
   return (
