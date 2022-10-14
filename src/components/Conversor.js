@@ -16,11 +16,13 @@ export default class Conversor extends Component{
             coinB_type: "BRL",
             APIGraph: null,
             graphMode: false,
-            hc: '',
+            graph: '',
+            selected: 0,
         }
 
         this.converter = this.converter.bind(this);
         this.season = this.season.bind(this);
+        this.swap = this.swap.bind(this);
     }
 
     async converter() {
@@ -42,7 +44,11 @@ export default class Conversor extends Component{
     swap(){
         let aux, coinA_type, coinB_type;
 
-        //console.log(graph)
+        if(this.state.selected === 0){
+            this.setState({ selected: 1 });
+        }else{
+            this.setState({ selected: 0});
+        }
 
         aux = this.state.coinB_type;
         coinB_type = this.state.coinA_type;
@@ -51,11 +57,8 @@ export default class Conversor extends Component{
         this.setState ({ coinA_type, coinB_type }, () => {
             this.converter();
 
-            // if (this.graphMode === true) {
-            //     console.log("Gráfico ativo, chamar função Season!!");
-            //     //this.season();
-            // }else{
-            //     console.log('Não há gráfico')
+            // if (this.state.graphMode === true){
+            //     this.season();
             // }
         });
     }
@@ -65,7 +68,16 @@ export default class Conversor extends Component{
             let dateEnd = DateTime.now().setZone("system");
             let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', url = '', resData = [], newData = [],average = 0;
 
-            this.graphMode = true;
+            this.state.graphMode = true;
+            //this.setState({ graph: graphOpt });
+
+           // console.log('graph?:', graph);
+            //console.log('T.S.graph?:', this.state.graph);
+
+            // if(this.state.graph !== ''){
+            //     graph = this.state.graph;
+            //     console.log('novoGraph:', graph)
+            // }
 
             switch(graph){
                 case '1H':
@@ -153,7 +165,7 @@ export default class Conversor extends Component{
                                 fill: true,
                                 lineTension: 0,
                                 cubicInterpolationMode: 'monotone',
-                                pointHitRadius: 8,
+                                pointHitRadius: 5,
                                 pointHoverBorderWidth: 4.5,
                                 pointRadius: 0,
                                 //pointBorderWidth: 2,
@@ -168,6 +180,7 @@ export default class Conversor extends Component{
                             }]
                         }
                         this.setState({APIGraph});
+                        //this.setState({ graph });
                     })
                 )
         } catch(error) {
@@ -178,6 +191,36 @@ export default class Conversor extends Component{
     render() {
         const options = this.props.options;
         const listOfSiglas = Object.keys(options);
+        const listOfNames = (Object.values(Object(options)));
+        //console.log(options)
+
+        listOfNames.sort();
+        //console.log(listOfNames)
+
+        // const teste = options.filter()
+        // console.log(teste)
+
+        // options.sort(function(listOfNames, )){
+        //     if(listOfNames > ){
+
+        //     }
+        // }
+       // listOfNames.sort();
+
+       //console.log(listOfNames[]);
+
+        //console.log(options)
+        // for(let i=0; i<listOfNames.length; i++){
+        //     options.sort((a, b) => listOfNames.indexOf(listOfNames[i]) - listOfNames.indexOf(listOfNames[i+1]));
+        // }
+        //listOfNames.sort((a, b) => listOfSiglas.indexOf(a) - listOfSiglas.indexOf(b));
+
+        //console.log(listOfSiglas)
+        // const listOfNames = [...listOfSiglas];
+        // listOfNames.sort();
+        // console.log(listOfNames)
+
+        //console.log(listOfNames);
 
         return (
             <div id="application">
@@ -199,7 +242,11 @@ export default class Conversor extends Component{
 
                     <select value={this.state.coinA_type} onChange={(event) => {this.setState({ coinA_type: event.target.value })}} id="converter">
                         {listOfSiglas.map((key) => {
-                            return (<option value={key} key={key+"converter"}>{options[key]}</option>)
+                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected !== 0 && !(key === this.state.coinB_type)){
+                                return (<option value={key} key={key+"converter"}>{options[key]}</option>)
+                            }else if(this.state.selected !== 1 ){
+                                return (<option value={key} key={key+"converter"}>{options[key]}</option>)
+                            }
                         })}
                     </select>
                 </div>
@@ -213,10 +260,11 @@ export default class Conversor extends Component{
                     <input disabled value={this.state.coinB_value}></input>
                     <select value={this.state.coinB_type} onChange={(event) => {this.setState({ coinB_type: event.target.value })}} id="converted">
                         {listOfSiglas.map((key) => {
-                            if(key === 'USD' || key === 'BRL' || key === 'EUR'){
-                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
-                            }
-
+                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected === 0 && !(key === this.state.coinA_type)){
+                               return (<option value={key} key={key+"converted"}>{options[key]}</option>)
+                            }else if(this.state.selected === 1 ){
+                               return (<option value={key} key={key+"converted"}>{options[key]}</option>)
+                           }
                         })}
                     </select>
                 </div>
