@@ -16,7 +16,6 @@ export default class Conversor extends Component{
             coinB_type: "BRL",
             APIGraph: null,
             graphMode: false,
-            graph: '',
             selected: 0,
         }
 
@@ -56,10 +55,6 @@ export default class Conversor extends Component{
 
         this.setState ({ coinA_type, coinB_type }, () => {
             this.converter();
-
-            // if (this.state.graphMode === true){
-            //     this.season();
-            // }
         });
     }
 
@@ -67,17 +62,6 @@ export default class Conversor extends Component{
         try {
             let dateEnd = DateTime.now().setZone("system");
             let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', url = '', resData = [], newData = [],average = 0;
-
-            this.state.graphMode = true;
-            //this.setState({ graph: graphOpt });
-
-           // console.log('graph?:', graph);
-            //console.log('T.S.graph?:', this.state.graph);
-
-            // if(this.state.graph !== ''){
-            //     graph = this.state.graph;
-            //     console.log('novoGraph:', graph)
-            // }
 
             switch(graph){
                 case '1H':
@@ -129,20 +113,15 @@ export default class Conversor extends Component{
                                     newData.push(data[i+1]);
                                 }
                             }
-                            //console.log(data)
-                            //console.log(newData)
 
                             const total = newData.reduce( (prev, curr) => prev + Number(curr.high), 0)
 
                             average = (total/newData.length).toFixed(4)
-                            //console.log(newData[newData.length-1].high)
 
                             if(newData[newData.length-1].high > average){
-                                //console.log('Média:', average, ' >>>>> Ultimo:', newData[0].high)
                                 graphColor1 = 'rgb(95,255,76)';
                                 graphColor2 = 'rgba(95,255,76,0.2)';
                             }else{
-                                //console.log('Média:', average, ' <<<<< Ultimo:', newData[0].high)
                                 graphColor1 = 'rgb(247,126,126)';
                                 graphColor2 = 'rgba(247,126,126,0.2)';
                             }
@@ -168,7 +147,6 @@ export default class Conversor extends Component{
                                 pointHitRadius: 5,
                                 pointHoverBorderWidth: 4.5,
                                 pointRadius: 0,
-                                //pointBorderWidth: 2,
                                 pointHoverRadius: 6,
                                 backgroundColor: graphColor2,
                                 borderColor: graphColor1,
@@ -180,7 +158,6 @@ export default class Conversor extends Component{
                             }]
                         }
                         this.setState({APIGraph});
-                        //this.setState({ graph });
                     })
                 )
         } catch(error) {
@@ -191,36 +168,6 @@ export default class Conversor extends Component{
     render() {
         const options = this.props.options;
         const listOfSiglas = Object.keys(options);
-        const listOfNames = (Object.values(Object(options)));
-        //console.log(options)
-
-        listOfNames.sort();
-        //console.log(listOfNames)
-
-        // const teste = options.filter()
-        // console.log(teste)
-
-        // options.sort(function(listOfNames, )){
-        //     if(listOfNames > ){
-
-        //     }
-        // }
-       // listOfNames.sort();
-
-       //console.log(listOfNames[]);
-
-        //console.log(options)
-        // for(let i=0; i<listOfNames.length; i++){
-        //     options.sort((a, b) => listOfNames.indexOf(listOfNames[i]) - listOfNames.indexOf(listOfNames[i+1]));
-        // }
-        //listOfNames.sort((a, b) => listOfSiglas.indexOf(a) - listOfSiglas.indexOf(b));
-
-        //console.log(listOfSiglas)
-        // const listOfNames = [...listOfSiglas];
-        // listOfNames.sort();
-        // console.log(listOfNames)
-
-        //console.log(listOfNames);
 
         return (
             <div id="application">
@@ -234,7 +181,6 @@ export default class Conversor extends Component{
                             (event) => {
                                 let valorInput = event.target.value;
                                 this.setState({ coinA_value: valorInput });
-                                //console.log( this.state.coinA_value );
                                 this.converter();
                             }
                         }
