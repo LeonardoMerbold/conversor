@@ -1,64 +1,53 @@
-import React, { Component } from 'react';
+import React, { useState, useCallback } from 'react';
 import './Conversor.css';
 import { DateTime } from 'luxon';
 import { Chart as ChartJS } from 'chart.js/auto';
 import {Line} from 'react-chartjs-2';
 
-export default class Conversor extends Component{
+export default function Conversor(){
 
-    constructor(props) {
-        super(props);
+    const [coinA_value, setCoinA_value] = useState(0);
+    const [coinB_value, setCoinB_value] = useState(0);
+    const [coinA_type, setCoinA_type] = useState("USD");
+    const [coinB_type, setCoinB_type] = useState("BRL");
+    const [APIGraph, setAPIGraph] = useState(null);
+    const [selected, setSelected] = useState(0);
 
-        this.state = {
-            coinA_value: 0,
-            coinB_value: 0,
-            coinA_type: "USD",
-            coinB_type: "BRL",
-            APIGraph: null,
-            graphMode: false,
-            selected: 0,
-        }
-
-        this.converter = this.converter.bind(this);
-        this.season = this.season.bind(this);
-        this.swap = this.swap.bind(this);
-    }
-
-    async converter() {
-        const from_to = `${this.state.coinA_type}${this.state.coinB_type}`
-        const url = `https://economia.awesomeapi.com.br/json/last/${this.state.coinA_type}-${this.state.coinB_type}`
+    async function Converter() {
+        const from_to = `${coinA_type}${coinB_type}`
+        const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
 
         const quotation = await fetch(url)
             .then((e) => e.json())
             .then((e) => e[from_to].bid);
 
-        if (this.state.coinA_value === "") {
-            this.setState({ coinB_value:'' });
+        if (coinA_value === "") {
+            setCoinB_value('');
         } else {
-            const coinB_value = (parseFloat(this.state.coinA_value) * quotation).toFixed(2)
-            this.setState({ coinB_value })
+            setCoinB_value((parseFloat(coinA_value * quotation).toFixed(2)))
         }
     }
 
-    swap(){
+    function Swap(){
         let aux, coinA_type, coinB_type;
 
-        if(this.state.selected === 0){
-            this.setState({ selected: 1 });
+        if(selected === 0){
+            setSelected(1);
         }else{
-            this.setState({ selected: 0});
+            setSelected(0);
         }
 
-        aux = this.state.coinB_type;
-        coinB_type = this.state.coinA_type;
-        coinA_type = aux;
+        aux = coinB_type;
+        setCoinB_type(coinA_type);
+        setCoinA_type(aux);
 
-        this.setState ({ coinA_type, coinB_type }, () => {
-            this.converter();
+        useCallback(async () => {
+            Converter();
+            //season();
         });
     }
 
-    async season(graph) {
+    function Season(graph) {
         try {
             let dateEnd = DateTime.now().setZone("system");
             let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', url = '', resData = [], newData = [],average = 0;
@@ -96,7 +85,7 @@ export default class Conversor extends Component{
                     alert('Atenção: Use apenas os valores válidos!');
             }
 
-            (graph === '1H' ? url = `https://economia.awesomeapi.com.br/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${this.state.coinA_type}-${this.state.coinB_type}/${dateAmount}`)
+            (graph === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
 
             fetch(url)
                 .then( (e) => e.json()
@@ -157,7 +146,7 @@ export default class Conversor extends Component{
                                 data: resData.reverse(),
                             }]
                         }
-                        this.setState({APIGraph});
+                        setAPIGraph(APIGraph);
                     })
                 )
         } catch(error) {
@@ -165,53 +154,54 @@ export default class Conversor extends Component{
         }
     }
 
-    render() {
-        const options = this.props.options;
-        const listOfSiglas = Object.keys(options);
+    //const [options, useOptions] = useState(options)
+    //const [listOfSiglas, setlistOfSiglas] = useState(Object.keys(options))
+
+    //const options = this.props.options;
+    //const listOfSiglas = Object.keys(options);
 
         return (
             <div id="application">
 
                 <div id="currency:1">
                     <input
-                        value={this.state.coinA_value}
+                        value={coinA_value}
                         type="number"
                         min="0"
                         onInput={
                             (event) => {
                                 let valorInput = event.target.value;
-                                this.setState({ coinA_value: valorInput });
-                                this.converter();
+                                setCoinA_value(valorInput);
+                                Converter();
                             }
                         }
                     />
-
-                    <select value={this.state.coinA_type} onChange={(event) => {this.setState({ coinA_type: event.target.value })}} id="converter">
-                        {listOfSiglas.map((key) => {
+                    <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
+                    {/* {listOfSiglas.map((key) => {
                             if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected !== 0 && !(key === this.state.coinB_type)){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                             }else if(this.state.selected !== 1 ){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                             }
-                        })}
+                        })} */}
                     </select>
                 </div>
 
                 <div>
-                    <button onClick={() => { this.swap() }}>Inverter</button>
+                    <button onClick={() => { Swap() }}>Inverter</button>
                 </div>
 
                 <div id="currency:2">
 
-                    <input disabled value={this.state.coinB_value}></input>
-                    <select value={this.state.coinB_type} onChange={(event) => {this.setState({ coinB_type: event.target.value })}} id="converted">
-                        {listOfSiglas.map((key) => {
+                    <input disabled value={coinB_value}></input>
+                    <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
+                        {/* {listOfSiglas.map((key) => {
                             if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected === 0 && !(key === this.state.coinA_type)){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                             }else if(this.state.selected === 1 ){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                            }
-                        })}
+                        })} */}
                     </select>
                 </div>
 
@@ -221,26 +211,25 @@ export default class Conversor extends Component{
 
                     <div id="graph-buttons">
 
-                        <button onClick={() => { this.season('1H') }}>1H</button>
+                        <button onClick={() => { Season('1H') }}>1H</button>
 
-                        <button onClick={() => { this.season('15D') }}>15D</button>
+                        <button onClick={() => { Season('15D') }}>15D</button>
 
-                        <button onClick={() => { this.season('1M') }}>1M</button>
+                        <button onClick={() => { Season('1M') }}>1M</button>
 
-                        <button onClick={() => { this.season('3M') }}>3M</button>
+                        <button onClick={() => { Season('3M') }}>3M</button>
 
-                        <button onClick={() => { this.season('6M') }}>6M</button>
+                        <button onClick={() => { Season('6M') }}>6M</button>
 
-                        <button onClick={() => { this.season('1A') }}>1A</button>
+                        <button onClick={() => { Season('1A') }}>1A</button>
 
                     </div>
 
                 </div>
 
                 <div>
-                    { this.state.APIGraph !== null ? (<Line data={this.state.APIGraph} />) : <h4> Aguardando Gráfico... </h4>}
+                    { APIGraph !== null ? (<Line data={APIGraph} />) : <h4> Aguardando Gráfico... </h4>}
                 </div>
             </div>
         )
-    }
 }
