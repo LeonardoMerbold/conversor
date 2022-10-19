@@ -1,8 +1,9 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import './Conversor.css';
 import { DateTime } from 'luxon';
 import { Chart as ChartJS } from 'chart.js/auto';
 import {Line} from 'react-chartjs-2';
+import { useCurrency } from '../contexts/Currency';
 
 export default function Conversor(){
 
@@ -12,6 +13,8 @@ export default function Conversor(){
     const [coinB_type, setCoinB_type] = useState("BRL");
     const [APIGraph, setAPIGraph] = useState(null);
     const [selected, setSelected] = useState(0);
+
+    const {options, loading} = useCurrency();
 
     async function Converter() {
         const from_to = `${coinA_type}${coinB_type}`
@@ -29,7 +32,7 @@ export default function Conversor(){
     }
 
     function Swap(){
-        let aux, coinA_type, coinB_type;
+        let aux;
 
         if(selected === 0){
             setSelected(1);
@@ -41,10 +44,10 @@ export default function Conversor(){
         setCoinB_type(coinA_type);
         setCoinA_type(aux);
 
-        useCallback(async () => {
-            Converter();
-            //season();
-        });
+        // useCallback(async () => {
+        //     Converter();
+        //     //season();
+        // });
     }
 
     function Season(graph) {
@@ -154,11 +157,19 @@ export default function Conversor(){
         }
     }
 
-    //const [options, useOptions] = useState(options)
-    //const [listOfSiglas, setlistOfSiglas] = useState(Object.keys(options))
+    if(loading){
+        <h1>Carregando...</h1>
+    }
 
-    //const options = this.props.options;
-    //const listOfSiglas = Object.keys(options);
+    // const currencyList = (() => {
+    //     console.log('asdasdasd')
+    //     return Object.keys(options || {});
+    // }) ();
+
+    // o useMemo foi utilizado para que não seja renderizado novamente ao mexer em coisas desvinculadas ao 'options'
+    const currencyList = useMemo(() => {
+        return Object.keys(options || {});
+    }, [options])
 
         return (
             <div id="application">
@@ -177,13 +188,13 @@ export default function Conversor(){
                         }
                     />
                     <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
-                    {/* {listOfSiglas.map((key) => {
-                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected !== 0 && !(key === this.state.coinB_type)){
+                        {currencyList.map((key) => {
+                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
-                            }else if(this.state.selected !== 1 ){
+                            }else if(selected !== 1 ){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                             }
-                        })} */}
+                        })}
                     </select>
                 </div>
 
@@ -195,17 +206,15 @@ export default function Conversor(){
 
                     <input disabled value={coinB_value}></input>
                     <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
-                        {/* {listOfSiglas.map((key) => {
-                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && this.state.selected === 0 && !(key === this.state.coinA_type)){
+                        {currencyList.map((key) => {
+                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
-                            }else if(this.state.selected === 1 ){
+                            }else if(selected === 1 ){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                            }
-                        })} */}
+                        })}
                     </select>
                 </div>
-
-    {/* GRAFICO */}
 
                 <div id="graph-app">
 
