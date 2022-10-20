@@ -6,7 +6,7 @@ function CurrencyProvider(props){
 
     const [options, setOptions] = useState(null);
 
-    const reqAcurrency = async () => {
+    const reqCurrency = async () => {
 
         const APIResponse = await fetch("https://economia.awesomeapi.com.br/json/available/uniq");
 
@@ -18,7 +18,7 @@ function CurrencyProvider(props){
 
     const fetchOptions = useCallback(async () => {
       try {
-        const data = await (reqAcurrency())
+        const data = await (reqCurrency())
         setOptions(data);
 
       } catch (ex) {

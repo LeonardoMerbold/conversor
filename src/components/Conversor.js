@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import './Conversor.css';
 import { DateTime } from 'luxon';
 import { Chart as ChartJS } from 'chart.js/auto';
@@ -16,7 +16,7 @@ export default function Conversor(){
 
     const {options, loading} = useCurrency();
 
-    async function Converter() {
+    async function Converter(inputValue) {
         const from_to = `${coinA_type}${coinB_type}`
         const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
 
@@ -24,10 +24,10 @@ export default function Conversor(){
             .then((e) => e.json())
             .then((e) => e[from_to].bid);
 
-        if (coinA_value === "") {
+        if (inputValue === "") {
             setCoinB_value('');
         } else {
-            setCoinB_value((parseFloat(coinA_value * quotation).toFixed(2)))
+            setCoinB_value((parseFloat(inputValue * quotation).toFixed(2)))
         }
     }
 
@@ -43,12 +43,11 @@ export default function Conversor(){
         aux = coinB_type;
         setCoinB_type(coinA_type);
         setCoinA_type(aux);
-
-        // useCallback(async () => {
-        //     Converter();
-        //     //season();
-        // });
     }
+
+    useEffect(() => {
+        Converter(coinA_value);
+    }, [coinA_type]);
 
     function Season(graph) {
         try {
@@ -162,7 +161,6 @@ export default function Conversor(){
     }
 
     // const currencyList = (() => {
-    //     console.log('asdasdasd')
     //     return Object.keys(options || {});
     // }) ();
 
@@ -170,6 +168,12 @@ export default function Conversor(){
     const currencyList = useMemo(() => {
         return Object.keys(options || {});
     }, [options])
+
+    // Modo sincrono de efetuar a operação do 'onChange';
+    // useEffect(() => {
+    //     console.log('Iniciou o effect!!');
+    //     Converter(coinA_value);
+    // }, [coinA_value]);
 
         return (
             <div id="application">
@@ -179,11 +183,11 @@ export default function Conversor(){
                         value={coinA_value}
                         type="number"
                         min="0"
-                        onInput={
+                        onChange={
                             (event) => {
-                                let valorInput = event.target.value;
-                                setCoinA_value(valorInput);
-                                Converter();
+                                let inputValue = event.target.value;
+                                setCoinA_value(inputValue);
+                                Converter(inputValue);
                             }
                         }
                     />
@@ -211,7 +215,7 @@ export default function Conversor(){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                             }else if(selected === 1 ){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
-                           }
+                            }
                         })}
                     </select>
                 </div>
