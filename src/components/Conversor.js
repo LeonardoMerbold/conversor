@@ -11,6 +11,8 @@ export default function Conversor(){
     const [coinB_value, setCoinB_value] = useState(0);
     const [coinA_type, setCoinA_type] = useState("USD");
     const [coinB_type, setCoinB_type] = useState("BRL");
+    const [graphPeriod, setGraphPeriod] = useState('');
+    const [graphMode, setGraphMode] = useState(0);
     const [APIGraph, setAPIGraph] = useState(null);
     const [selected, setSelected] = useState(0);
 
@@ -31,7 +33,7 @@ export default function Conversor(){
         }
     }
 
-    function Swap(){
+    async function Swap(){
         let aux;
 
         if(selected === 0){
@@ -47,14 +49,30 @@ export default function Conversor(){
 
     useEffect(() => {
         Converter(coinA_value);
+
+        if(graphMode !== 0){
+            Season(graphPeriod);
+        }
     }, [coinA_type]);
 
-    function Season(graph) {
+    function Period(buttonValue){
+        setGraphPeriod(buttonValue);
+    }
+
+    useEffect(() => {
+        if(graphPeriod !== ''){
+            Season(graphPeriod);
+        }
+    }, [graphPeriod]);
+
+    function Season() {
         try {
             let dateEnd = DateTime.now().setZone("system");
             let dateStart = 0, dateAmount = 0, graphColor1 = '', graphColor2 = '', url = '', resData = [], newData = [],average = 0;
 
-            switch(graph){
+            setGraphMode(1);
+
+            switch(graphPeriod){
                 case '1H':
                     dateStart = dateEnd.minus({ days: 1 });
                     dateAmount  = 54;
@@ -87,12 +105,12 @@ export default function Conversor(){
                     alert('Atenção: Use apenas os valores válidos!');
             }
 
-            (graph === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
+            (graphPeriod === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
 
             fetch(url)
                 .then( (e) => e.json()
                     .then( data => {
-                        if(graph === '1H'){
+                        if(graphPeriod === '1H'){
                             resData = ( data.map((e) => e.bid ))
                             newData = data.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
                         }else{
@@ -160,20 +178,10 @@ export default function Conversor(){
         <h1>Carregando...</h1>
     }
 
-    // const currencyList = (() => {
-    //     return Object.keys(options || {});
-    // }) ();
-
     // o useMemo foi utilizado para que não seja renderizado novamente ao mexer em coisas desvinculadas ao 'options'
     const currencyList = useMemo(() => {
         return Object.keys(options || {});
     }, [options])
-
-    // Modo sincrono de efetuar a operação do 'onChange';
-    // useEffect(() => {
-    //     console.log('Iniciou o effect!!');
-    //     Converter(coinA_value);
-    // }, [coinA_value]);
 
         return (
             <div id="application">
@@ -224,17 +232,17 @@ export default function Conversor(){
 
                     <div id="graph-buttons">
 
-                        <button onClick={() => { Season('1H') }}>1H</button>
+                        <button onClick={() => { Period('1H'); }}>1H</button>
 
-                        <button onClick={() => { Season('15D') }}>15D</button>
+                        <button onClick={() => { Period('15D') }}>15D</button>
 
-                        <button onClick={() => { Season('1M') }}>1M</button>
+                        <button onClick={() => { Period('1M') }}>1M</button>
 
-                        <button onClick={() => { Season('3M') }}>3M</button>
+                        <button onClick={() => { Period('3M') }}>3M</button>
 
-                        <button onClick={() => { Season('6M') }}>6M</button>
+                        <button onClick={() => { Period('6M') }}>6M</button>
 
-                        <button onClick={() => { Season('1A') }}>1A</button>
+                        <button onClick={() => { Period('1A') }}>1A</button>
 
                     </div>
 
