@@ -50,20 +50,14 @@ export default function Conversor(){
     useEffect(() => {
         Converter(coinA_value);
 
-        if(graphMode !== 0){
+        if(graphMode !== 0 || graphPeriod !== ''){
             Season(graphPeriod);
         }
-    }, [coinA_type]);
+    }, [coinA_type, coinB_type, graphPeriod]);
 
     function Period(buttonValue){
         setGraphPeriod(buttonValue);
     }
-
-    useEffect(() => {
-        if(graphPeriod !== ''){
-            Season(graphPeriod);
-        }
-    }, [graphPeriod]);
 
     function Season() {
         try {
@@ -201,9 +195,7 @@ export default function Conversor(){
                     />
                     <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
                         {currencyList.map((key) => {
-                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)){
-                                return (<option value={key} key={key+"converter"}>{options[key]}</option>)
-                            }else if(selected !== 1 ){
+                            if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                             }
                         })}
@@ -216,12 +208,10 @@ export default function Conversor(){
 
                 <div id="currency:2">
 
-                    <input disabled value={coinB_value}></input>
+                    <input disabled value={coinB_value} />
                     <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
                         {currencyList.map((key) => {
-                            if((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)){
-                               return (<option value={key} key={key+"converted"}>{options[key]}</option>)
-                            }else if(selected === 1 ){
+                            if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                             }
                         })}
