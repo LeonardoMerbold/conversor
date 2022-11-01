@@ -1,12 +1,6 @@
 import { createContext, useContext, useCallback, useEffect, useState } from "react";
 
-const CurrencyContext = createContext({});
-
-// interface CurrencyProps {
-//   options: string,
-//   loading: string,
-//   children?: any,
-// };
+const CurrencyContext = createContext({})
 
 export function CurrencyProvider({children}: {children: React.ReactNode} ){
 

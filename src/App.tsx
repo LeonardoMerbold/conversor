@@ -1,5 +1,4 @@
 import './App.css';
-import React from 'react';
 import Conversor from "./components/Conversor";
 import CurrencyProvider from "./contexts/Currency";
 

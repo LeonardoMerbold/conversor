@@ -5,19 +5,10 @@ import { Chart as ChartJS } from 'chart.js/auto';
 import { Line } from 'react-chartjs-2';
 import { useCurrency } from "../contexts/Currency";
 
-interface InputVariables {
-    buttonValue: string,
-};
-
 interface CurrencyVariables {
     options: any,
     loading: any,
 }
-
-// interface teste {
-//     inputValue: any,
-//     quotation: number,
-// }
 
 export default function Conversor(){
 
@@ -27,12 +18,12 @@ export default function Conversor(){
     const [coinB_type, setCoinB_type] = useState<string>("BRL");
     const [graphPeriod, setGraphPeriod] = useState<string>('');
     const [graphMode, setGraphMode] = useState<boolean>(false);
-    const [APIGraph, setAPIGraph] = useState<object>({});
+    const [APIGraph, setAPIGraph] = useState<any>({});
     const [selected, setSelected] = useState<number>(0);
 
-    //const {options, loading} = useCurrency();
+    const {options, loading} = useCurrency() as CurrencyVariables;
 
-    async function Converter(inputValue: any) {
+    async function Converter(inputValue: string|number) {
         const from_to = `${coinA_type}${coinB_type}`
         const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
 
@@ -43,7 +34,7 @@ export default function Conversor(){
         if (inputValue === "") {
             setCoinB_value('');
         } else {
-            //setCoinB_value((parseFloat(inputValue * quotation).toFixed(2)))
+            setCoinB_value(( (parseFloat as any) ((inputValue as number) * quotation).toFixed(2) ))
         }
     }
 
@@ -77,7 +68,7 @@ export default function Conversor(){
     function Season(graphPeriod:string) {
         try {
             let dateEnd:any = DateTime.now().setZone("system");
-            var dateStart:any, dateAmount: number, graphColor1: string, graphColor2: string, url: string, resData: Array<string>, newData: Array<string>, average: string;
+            let dateStart:any, dateAmount: any, graphColor1: string, graphColor2: string, url: string, resData: Array<string>, newData: any, average: string;
 
             setGraphMode(true);
 
@@ -116,10 +107,7 @@ export default function Conversor(){
                     alert('Atenção: Use apenas os valores válidos!');
             }
 
-            // (graphPeriod === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
-
-            url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}`
-
+            (graphPeriod === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
 
             fetch(url)
                 .then( (e) => e.json()
@@ -137,17 +125,17 @@ export default function Conversor(){
                                 }
                             }
 
-                            const total = newData.reduce( (prev, curr:any) => prev + Number(curr.high), 0)
+                            const total = newData.reduce( (prev:number, curr:any) => prev + Number(curr.high), 0)
 
                             average = (total/newData.length).toFixed(4)
 
-                            // if(newData[newData.length-1].high > average){
-                            //     graphColor1 = 'rgb(95,255,76)';
-                            //     graphColor2 = 'rgba(95,255,76,0.2)';
-                            // }else{
-                            //     graphColor1 = 'rgb(247,126,126)';
-                            //     graphColor2 = 'rgba(247,126,126,0.2)';
-                            // }
+                            if(newData[newData.length-1].high > average){
+                                graphColor1 = 'rgb(95,255,76)';
+                                graphColor2 = 'rgba(95,255,76,0.2)';
+                            }else{
+                                graphColor1 = 'rgb(247,126,126)';
+                                graphColor2 = 'rgba(247,126,126,0.2)';
+                            }
 
                             resData = ( newData.map((e:any) => e.high ));
                             resData = resData.map(str => {
@@ -157,7 +145,7 @@ export default function Conversor(){
                                     return Number(str).toFixed(2);
                                 }
                             })
-                            // newData = newData.reverse().map((e) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
+                            newData = newData.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
                         }
 
                         const APIGraph = {
@@ -188,14 +176,14 @@ export default function Conversor(){
         }
     }
 
-    // if(loading){
-    //     <h1>Carregando...</h1>
-    // }
+    if(loading){
+        <h1>Carregando...</h1>
+    }
 
     // o useMemo foi utilizado para que não seja renderizado novamente ao mexer em coisas desvinculadas ao 'options'
-    // const currencyList = useMemo(() => {
-    //     return Object.keys(options || {});
-    // }, [options])
+    const currencyList = useMemo(() => {
+        return Object.keys(options || {});
+    }, [options])
 
         return (
             <div id="application">
@@ -213,13 +201,13 @@ export default function Conversor(){
                             }
                         }
                     />
-                    {/* <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
+                    <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
                         {currencyList.map((key) => {
                             if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                             }
                         })}
-                    </select> */}
+                    </select>
                 </div>
 
                 <div>
@@ -229,13 +217,13 @@ export default function Conversor(){
                 <div id="currency:2">
 
                     <input disabled value={coinB_value} />
-                    {/* <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
+                    <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
                         {currencyList.map((key) => {
                             if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                             }
                         })}
-                    </select> */}
+                    </select>
                 </div>
 
                 <div id="graph-app">
