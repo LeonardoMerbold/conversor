@@ -1,6 +1,7 @@
 import './App.css';
-import Conversor from './components/Conversor';
-import CurrencyProvider from './contexts/Currency';
+import React from 'react';
+import Conversor from "./components/Conversor";
+import CurrencyProvider from "./contexts/Currency";
 
 function App() {
 

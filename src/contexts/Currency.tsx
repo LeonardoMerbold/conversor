@@ -2,9 +2,15 @@ import { createContext, useContext, useCallback, useEffect, useState } from "rea
 
 const CurrencyContext = createContext({});
 
-function CurrencyProvider(props){
+// interface CurrencyProps {
+//   options: string,
+//   loading: string,
+//   children?: any,
+// };
 
-    const [options, setOptions] = useState(null);
+export function CurrencyProvider({children}: {children: React.ReactNode} ){
+
+    const [options, setOptions] = useState({});
 
     const reqCurrency = async () => {
 
@@ -32,7 +38,7 @@ function CurrencyProvider(props){
 
     return (
       <CurrencyContext.Provider value={{options, fetchOptions, loading: options === null}} >
-          {props.children}
+          {children}
       </CurrencyContext.Provider>
     )
 }
