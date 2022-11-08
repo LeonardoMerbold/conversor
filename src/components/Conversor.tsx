@@ -75,10 +75,8 @@ export default function Conversor(){
             switch(graphPeriod){
                 case '1H':
                     dateStart = dateEnd.minus({ days: 1 });
-                    console.log(dateStart);
                     dateAmount  = 54;
                     dateStart = dateStart.toFormat('yyyyMMdd');
-                    console.log(dateStart);
                     dateEnd = dateEnd.toFormat('yyyyMMdd');
                     graphColor1 = 'rgb(255,255,255)';
                     graphColor2 = 'rgba(240,240,240,0.2)';
@@ -117,13 +115,14 @@ export default function Conversor(){
                             newData = data.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
                         }else{
                             resData = data.map((e:any) => e.high );
-                            newData.push( data[0] );
+                            newData = [newData, data[0]]; //return undefined value
 
                             for(let i = 0 ; i < data.length-1 ; i++){
                                 if(data[i].timestamp - data[i+1].timestamp > 1000){
-                                    newData.push(data[i+1]);
+                                    newData = [...newData, data[i+1]];
                                 }
                             }
+                            newData = newData.filter(Boolean); //remove undefined value
 
                             const total = newData.reduce( (prev:number, curr:any) => prev + Number(curr.high), 0)
 
@@ -247,7 +246,7 @@ export default function Conversor(){
                 </div>
 
                 <div>
-                    {/* { APIGraph !== null ? (<Line data = {APIGraph} />) : <h4> Aguardando Gráfico... </h4>} */}
+                    {/* { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Aguardando Gráfico... </h4>} */}
                 </div>
             </div>
         )
