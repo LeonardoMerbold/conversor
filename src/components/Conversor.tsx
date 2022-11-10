@@ -1,9 +1,11 @@
 import './Conversor.css';
 import React, { useState, useMemo, useEffect } from 'react';
 import { DateTime } from 'luxon';
-import { Chart as ChartJS } from 'chart.js/auto';
-import { Line } from 'react-chartjs-2';
+import { Chart as ChartJS, registerables } from 'chart.js';
+import { Chart, Line } from 'react-chartjs-2';
 import { useCurrency } from "../contexts/Currency";
+
+ChartJS.register(...registerables);
 
 interface CurrencyVariables {
     options: any,
@@ -18,7 +20,7 @@ export default function Conversor(){
     const [coinB_type, setCoinB_type] = useState<string>("BRL");
     const [graphPeriod, setGraphPeriod] = useState<string>('');
     const [graphMode, setGraphMode] = useState<boolean>(false);
-    const [APIGraph, setAPIGraph] = useState<any>({});
+    const [APIGraph, setAPIGraph] = useState<any>(null);
     const [selected, setSelected] = useState<number>(0);
 
     const {options, loading} = useCurrency() as CurrencyVariables;
@@ -168,6 +170,7 @@ export default function Conversor(){
                             }]
                         }
                         setAPIGraph(APIGraph);
+
                     })
                 )
         } catch(error) {
@@ -246,7 +249,7 @@ export default function Conversor(){
                 </div>
 
                 <div>
-                    {/* { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Aguardando Gráfico... </h4>} */}
+                    { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Aguardando Gráfico... </h4>}
                 </div>
             </div>
         )
