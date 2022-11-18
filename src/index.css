@@ -1,13 +1,55 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+@tailwind variants;
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+@layer components {
+
+    #application {
+        @apply grid grid-flow-row-dense grid-cols-11 grid-rows-6;
+    }
+
+    #currency1{
+        @apply place-self-center justify-self-end col-span-5;
+    }
+
+    #btn-swap {
+        @apply place-self-center col-span-1;
+    }
+
+    /* #arrow-path {
+        @apply motion-reduce:hidden animate-spin;
+    } */
+
+    #currency2{
+        @apply place-self-center justify-self-start col-span-5;
+    }
+
+    #converter-input, #converted{
+        @apply relative overflow-hidden rounded-tr-lg rounded-br-lg py-1.5 px-2 text-sm leading-5 ring-1 ring-gray-900/10 hover:ring-gray-900/20;
+    }
+
+    #converter, #converted-input {
+        @apply relative overflow-hidden rounded-tl-lg rounded-bl-lg py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20;
+    }
+
+    #converter-input,  #converted-input {
+        @apply w-28 h-8;
+    }
+
+    #converter, #converted {
+        @apply w-40 h-8;
+    }
+
+    #btn-primary, #btn-default {
+        @apply m-2 py-1 px-2 bg-gray-500 text-white font-semibold rounded-lg shadow-lg shadow-gray-500/40 border-b-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-red-700 focus:ring-opacity-70 ;
+    }
+
+    #graph-app {
+        @apply col-span-12 content-center place-self-center;
+    }
+
+    #graph-res{
+        @apply max-w-[75%] col-span-12 row-span-4 place-self-center;
+    }
 }

@@ -190,11 +190,20 @@ export default function Conversor(){
         return (
             <div id="application">
 
-                <div id="currency:1">
-                    <input
+                <div id="currency1">
+                    <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
+                        {currencyList.map((key) => {
+                            if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
+                                return (<option value={key} key={key+"converter"}>{options[key]}</option>)
+                            }
+                        })}
+                    </select>
+
+                    <input id='converter-input'
                         value={coinA_value}
                         type="number"
                         min="0"
+                        placeholder='0'
                         onChange={
                             (event) => {
                                 let inputValue = event.target.value;
@@ -203,22 +212,19 @@ export default function Conversor(){
                             }
                         }
                     />
-                    <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
-                        {currencyList.map((key) => {
-                            if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
-                                return (<option value={key} key={key+"converter"}>{options[key]}</option>)
-                            }
-                        })}
-                    </select>
                 </div>
 
-                <div>
-                    <button onClick={() => { Swap() }}>Inverter</button>
+                <div id="btn-swap">
+                    <button id="btn-default" onClick={() => { Swap() }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" id="arrow-path" height="20px" width="20px">
+                            <path fillRule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 003.306 9.67a.75.75 0 101.45.388zm15.408 3.352a.75.75 0 00-.919.53 7.5 7.5 0 01-12.548 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H2.984a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.059-4.035.75.75 0 00-.53-.918z" clipRule="evenodd" />
+                        </svg>
+                    </button>
                 </div>
 
-                <div id="currency:2">
+                <div id="currency2">
 
-                    <input disabled value={coinB_value} />
+                    <input id="converted-input" placeholder='0' disabled value={coinB_value} />
                     <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
                         {currencyList.map((key) => {
                             if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
@@ -232,25 +238,26 @@ export default function Conversor(){
 
                     <div id="graph-buttons">
 
-                        <button onClick={() => { Period('1H'); }}>1H</button>
+                        <button id="btn-primary" onClick={() => { Period('1H'); }}>1H</button>
 
-                        <button onClick={() => { Period('15D') }}>15D</button>
+                        <button id="btn-primary" onClick={() => { Period('15D') }}>15D</button>
 
-                        <button onClick={() => { Period('1M') }}>1M</button>
+                        <button id="btn-primary" onClick={() => { Period('1M') }}>1M</button>
 
-                        <button onClick={() => { Period('3M') }}>3M</button>
+                        <button id="btn-primary" onClick={() => { Period('3M') }}>3M</button>
 
-                        <button onClick={() => { Period('6M') }}>6M</button>
+                        <button id="btn-primary" onClick={() => { Period('6M') }}>6M</button>
 
-                        <button onClick={() => { Period('1A') }}>1A</button>
+                        <button id="btn-primary" onClick={() => { Period('1A') }}>1A</button>
 
                     </div>
 
                 </div>
 
-                <div>
-                    { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Aguardando Gráfico... </h4>}
+                <div id="graph-res">
+                    { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Selecione uma das opções acima! </h4>}
                 </div>
+
             </div>
         )
 }
