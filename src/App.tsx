@@ -1,8 +1,8 @@
-import './App.css';
-import Conversor from "./components/Conversor";
-import CurrencyProvider from "./contexts/Currency";
+import 'App.css';
+import Conversor from 'components/Conversor';
+import CurrencyProvider from "contexts/Currency";
 
-function App() {
+export default function App() {
 
   return (
     <div className="App">
@@ -13,5 +13,3 @@ function App() {
 
   );
 }
-
-export default App;

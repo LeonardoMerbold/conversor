@@ -1,9 +1,9 @@
-import './Conversor.css';
+import 'components/Conversor.css';
 import React, { useState, useMemo, useEffect } from 'react';
 import { DateTime } from 'luxon';
 import { Chart as ChartJS, registerables } from 'chart.js';
 import { Chart, Line } from 'react-chartjs-2';
-import { useCurrency } from "../contexts/Currency";
+import { useCurrency } from "contexts/Currency";
 
 ChartJS.register(...registerables);
 
@@ -188,10 +188,17 @@ export default function Conversor(){
     }, [options])
 
         return (
-            <div id="application">
+            <div id="application" className='grid grid-flow-row-dense grid-cols-11 grid-rows-6'>
 
-                <div id="currency1">
-                    <select value={coinA_type} onChange={(event) => {setCoinA_type(event.target.value)}} id="converter">
+                <div id="currency1" className='place-self-center justify-self-end col-span-5'>
+                    <select
+                        value={coinA_type}
+                        onChange={(event) => {
+                            setCoinA_type(event.target.value)
+                        }}
+                        id="converter"
+                        className='w-40 h-8 relative overflow-hidden rounded-tl-lg rounded-bl-lg py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
+                    >
                         {currencyList.map((key) => {
                             if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
                                 return (<option value={key} key={key+"converter"}>{options[key]}</option>)
@@ -199,7 +206,9 @@ export default function Conversor(){
                         })}
                     </select>
 
-                    <input id='converter-input'
+                    <input
+                        id='converter-input'
+                        className='w-28 h-8 relative overflow-hidden rounded-tr-lg rounded-br-lg py-1.5 px-2 text-sm leading-5 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
                         value={coinA_value}
                         type="number"
                         min="0"
@@ -214,18 +223,33 @@ export default function Conversor(){
                     />
                 </div>
 
-                <div id="btn-swap">
-                    <button id="btn-default" onClick={() => { Swap() }}>
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" id="arrow-path" height="20px" width="20px">
+                <div id="btn-swap" className='place-self-center col-span-1'>
+                    <button
+                        id="btn-default"
+                        onClick={() => { Swap() }}>
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" id="arrow-path" className='motion-reduce:hidden hover:animate-spin' height="20px" width="20px">
                             <path fillRule="evenodd" d="M4.755 10.059a7.5 7.5 0 0112.548-3.364l1.903 1.903h-3.183a.75.75 0 100 1.5h4.992a.75.75 0 00.75-.75V4.356a.75.75 0 00-1.5 0v3.18l-1.9-1.9A9 9 0 003.306 9.67a.75.75 0 101.45.388zm15.408 3.352a.75.75 0 00-.919.53 7.5 7.5 0 01-12.548 3.364l-1.902-1.903h3.183a.75.75 0 000-1.5H2.984a.75.75 0 00-.75.75v4.992a.75.75 0 001.5 0v-3.18l1.9 1.9a9 9 0 0015.059-4.035.75.75 0 00-.53-.918z" clipRule="evenodd" />
                         </svg>
                     </button>
                 </div>
 
-                <div id="currency2">
+                <div id="currency2" className="place-self-center justify-self-start col-span-5">
 
-                    <input id="converted-input" placeholder='0' disabled value={coinB_value} />
-                    <select value={coinB_type} onChange={(event) => {setCoinB_type(event.target.value)}} id="converted">
+                    <input
+                        id="converted-input"
+                        placeholder='0'
+                        disabled
+                        value={coinB_value}
+                        className='w-28 h-8 relative overflow-hidden rounded-tl-lg rounded-bl-lg py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
+                    />
+                    <select
+                        value={coinB_type}
+                        onChange={(event) => {
+                            setCoinB_type(event.target.value)
+                        }}
+                        id="converted"
+                        className='w-40 h-8 relative overflow-hidden rounded-tr-lg rounded-br-lg py-1.5 px-2 text-sm leading-5 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
+                    >
                         {currencyList.map((key) => {
                             if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
@@ -234,7 +258,7 @@ export default function Conversor(){
                     </select>
                 </div>
 
-                <div id="graph-app">
+                <div id="graph-app" className='col-span-12 content-center place-self-center'>
 
                     <div id="graph-buttons">
 
@@ -254,7 +278,7 @@ export default function Conversor(){
 
                 </div>
 
-                <div id="graph-res">
+                <div id="graph-res" className='w-[75%] flex items-center justify-center place-content-center place-items-center place-self-center col-span-12 row-span-4 grid-cols-3'>
                     { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Selecione uma das opções acima! </h4>}
                 </div>
 
