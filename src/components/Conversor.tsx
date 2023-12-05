@@ -194,9 +194,9 @@ export default function Conversor(){
     }, [options])
 
         return (
-            <div id="application" className='grid grid-flow-row-dense grid-cols-11 grid-rows-6'>
+            <div id="application" className='flex flex-wrap justify-center items-center'>
 
-                <div id="currency1" className='place-self-center justify-self-end col-span-5'>
+                <div id="currency1" className='flex flex-nowrap'>
                     <select
                         value={coinA_type}
                         onChange={(event) => {
@@ -229,7 +229,7 @@ export default function Conversor(){
                     />
                 </div>
 
-                <div id="btn-swap" className='place-self-center col-span-1'>
+                <div id="btn-swap" className='flex flex-nowrap'>
                     <button
                         id="btn-default"
                         onClick={() => { Swap() }}>
@@ -239,7 +239,7 @@ export default function Conversor(){
                     </button>
                 </div>
 
-                <div id="currency2" className="place-self-center justify-self-start col-span-5">
+                <div id="currency2" className='flex flex-nowrap'>
 
                     <input
                         id="converted-input"
@@ -264,9 +264,9 @@ export default function Conversor(){
                     </select>
                 </div>
 
-                <div id="graph-app" className='col-span-12 content-center place-self-center'>
+                <div id="graph-app" className='flex flex-row basis-full justify-center'>
 
-                    <div id="graph-buttons">
+                    <div id="graph-buttons" className='flex flex-nowrap'>
 
                         <button id="btn-primary" onClick={() => { Period('1H'); }}>1H</button>
 
@@ -284,7 +284,7 @@ export default function Conversor(){
 
                 </div>
 
-                <div id="graph-res" className='w-[75%] flex items-center justify-center place-content-center place-items-center place-self-center col-span-12 row-span-4 grid-cols-3'>
+                <div id="graph-res" className='flex flex-wrap w-9/12 justify-center'>
                     { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Selecione uma das opções acima! </h4>}
                 </div>
 
