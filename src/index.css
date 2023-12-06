@@ -5,7 +5,19 @@
 
 @layer components {
 
+    html {
+        @apply h-screen bg-gradient-to-b from-stone-900 to-gray-900;
+    }
+
+    h1, h3, h4 {
+        @apply text-white;
+    }
+
     #btn-primary, #btn-default {
-        @apply m-2 py-1 px-2 bg-gray-500 text-white font-semibold rounded-lg shadow-lg shadow-gray-500/40 border-b-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-opacity-70 active:animate-press-button transition-all;
+        @apply m-2 py-1 px-2 bg-gray-500 text-white font-semibold rounded-lg shadow-lg shadow-gray-500/40 border-b-2 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-700 focus:ring-opacity-70 active:animate-press-button transition-all;
+    }
+
+    #btn-primary {
+        @apply w-11;
     }
 }
