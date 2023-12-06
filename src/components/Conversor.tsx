@@ -194,7 +194,7 @@ export default function Conversor(){
 
         return (
             <div id="application" className='flex flex-wrap justify-center'>
-                <div id='currency-panel' className='my-2 flex flex-nowrap items-center'>
+                <div id='currency-panel' className='my-2 flex flex-nowrap items-center max-sm:flex-wrap max-sm:justify-center'>
                     <div id="currency1" className='flex flex-nowrap'>
                         <select
                             value={coinA_type}
@@ -227,7 +227,7 @@ export default function Conversor(){
                             }
                         />
                     </div>
-                    <div id="btn-swap" className='mx-2 flex flex-nowrap'>
+                    <div id="btn-swap" className='mx-2 flex flex-nowrap max-sm:w-full max-sm:justify-center'>
                         <button
                             id="btn-default"
                             className='w-12 h-12 flex justify-center items-center'
@@ -245,7 +245,7 @@ export default function Conversor(){
                             placeholder='0'
                             disabled
                             value={coinB_value}
-                            className='w-28 h-8 relative overflow-hidden rounded-tl-lg rounded-bl-lg py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
+                            className='w-28 h-8 relative overflow-hidden rounded-tl-lg rounded-bl-lg py-1.5 px-4 text-sm leading-6 ring-1 ring-gray-900/10 hover:ring-gray-900/20 max-sm:order-1 max-sm:rounded-none max-sm:rounded-br-lg max-sm:rounded-tr-lg'
                         />
                         <select
                             value={coinB_type}
@@ -253,7 +253,7 @@ export default function Conversor(){
                                 setCoinB_type(event.target.value)
                             }}
                             id="converted"
-                            className='w-40 h-8 relative overflow-hidden rounded-tr-lg rounded-br-lg py-1.5 px-2 text-sm leading-5 ring-1 ring-gray-900/10 hover:ring-gray-900/20'
+                            className='w-40 h-8 relative overflow-hidden rounded-tr-lg rounded-br-lg py-1.5 px-2 text-sm leading-5 ring-1 ring-gray-900/10 hover:ring-gray-900/20 max-sm:rounded-none max-sm:rounded-tl-lg max-sm:rounded-bl-lg'
                         >
                             {currencyList.map((key) => {
                                 if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
@@ -265,7 +265,7 @@ export default function Conversor(){
                 </div>
                 <div id="graph-app" className='mb-2 flex flex-row basis-full justify-center'>
 
-                    <div id="graph-buttons" className='flex flex-nowrap'>
+                    <div id="graph-buttons" className='flex flex-wrap'>
 
                         <button id="btn-primary" onClick={() => { Period('1H'); }}>1H</button>
 
@@ -283,7 +283,7 @@ export default function Conversor(){
 
                 </div>
 
-                <div id="graph-res" className='flex flex-wrap w-9/12 justify-center'>
+                <div id="graph-res" className='flex flex-wrap w-9/12 justify-center max-xl:w-11/12 max-sm:w-full'>
                     { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Selecione uma das opções acima! </h4>}
                 </div>
 
