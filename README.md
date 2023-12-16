@@ -1,17 +1,17 @@
 <h1 align="center"> Currency Converter </h1>
 
 <p align="center">
- <a href="description">Description</a> •
- <a href="badges">Badges</a> •
- <a href="technologies">Technologies</a> •
- <a href="installation">Installation</a> •
- <a href="application">Application</a> •
- <a href="author">Author</a>
+ <a href="#description">Description</a> •
+ <a href="#badges">Badges</a> •
+ <a href="#technologies">Technologies</a> •
+ <a href="#installation">Installation</a> •
+ <a href="#application">Application</a> •
+ <a href="#author">Author</a>
 </p>
 
-<p value="description">&emsp;Application developed to track currency conversion data from an API, presenting it in a dynamic and user-friendly way. The app includes past-hour, weekly, and monthly charts, making it easy to view and analyze conversion data.</p>
+<p id="description">&emsp;Application developed to track currency conversion data from an API, presenting it in a dynamic and user-friendly way. The app includes past-hour, weekly, and monthly charts, making it easy to view and analyze conversion data.</p>
 
-<p align="center" value="badges">
+<p align="center" id="badges">
   <img src="https://img.shields.io/static/v1?label=license&message=MIT&color=0550F2"/>
   <img src="https://img.shields.io/static/v1?label=status&message=Concluded&color=008B00"/>
   <img src="https://img.shields.io/static/v1?label=version&message=1.0.0&color=7E008A"/>
@@ -19,7 +19,7 @@
 </p>
 
 
-<h2 value="technologies"> Recommended versions of the technologies used </h2>
+<h2 id="technologies"> Recommended versions of the technologies used </h2>
 <table>
     <tr>
         <td><a href="https://docs.awesomeapi.com.br/api-de-moedas" target="_blank">Awesome API</a></td>
@@ -43,11 +43,11 @@
     </tr>
 </table>
 
-<h2 value="installation"> How to run the application </h2>
+<h2 id="installation"> How to run the application </h2>
 <h3> Requirements </h3>
 Before starting, you will need to have the following tools installed on your machine:
 <a href="https://git-scm.com" target="_blank">Git</a>, <a href="https://nodejs.org/en/" target="_blank">Node.js</a>.
-Furthermore, it's good to have an editor to work with the code like <a href="https://code.visualstudio.com/" target="_blank">VSCode</a>
+Furthermore, it's good to have an editor to work with the code like <a href="https://code.visualstudio.com/" target="_blank">VSCode</a>.
 
 ```bash
 # Clone this repository
@@ -66,9 +66,9 @@ $ npm start
 Then go to http://localhost:3000 in your browser
 ```
 
-<h3 value="application"> ➡️ <a href="https://leonardomerbold.github.io/conversor/" target="_blank">Test the application online</a> ⬅️</h3>
+<h3 id="application"> ➡️ <a href="https://leonardomerbold.github.io/conversor/" target="_blank">Test the application online</a> ⬅️</h3>
 
-<h2 value="author"> Author </h2>
+<h2 id="author"> Author </h2>
 <p>Leonardo Merbold</p>
 <p> Made by Leonardo Merbold </p>
 <p>
