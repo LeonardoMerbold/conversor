@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { DateTime } from 'luxon';
 import { Chart as ChartJS, registerables } from 'chart.js';
 import { Line } from 'react-chartjs-2';
@@ -13,7 +13,7 @@ interface CurrencyVariables {
 
 export default function Conversor(){
 
-    const [coinA_value, setCoinA_value] = useState<string>('');
+    const [coinA_value, setCoinA_value] = useState<string>('1');
     const [coinB_value, setCoinB_value] = useState<string>('');
     const [coinA_type, setCoinA_type] = useState<string>("USD");
     const [coinB_type, setCoinB_type] = useState<string>("BRL");
@@ -25,20 +25,23 @@ export default function Conversor(){
 
     const {options, loading} = useCurrency() as CurrencyVariables;
 
-    async function Converter(inputValue: string|number) {
-        const from_to = `${coinA_type}${coinB_type}`
-        const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
+    const Converter = useCallback(
+        async(inputValue: string|number) => {
+            const from_to = `${coinA_type}${coinB_type}`
+            const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
 
         const quotation = await fetch(url)
             .then((e) => e.json())
             .then((e) => e[from_to].bid);
 
-        if (inputValue === "") {
-            setCoinB_value('');
-        } else {
-            setCoinB_value(( (parseFloat as any) ((inputValue as number) * quotation).toFixed(2) ))
-        }
-    }
+            if (inputValue === "") {
+                setCoinB_value('');
+            } else {
+                setCoinB_value(( (parseFloat as any) ((inputValue as number) * quotation).toFixed(2) ))
+            }
+        },
+        [coinA_type, coinB_type]
+    );
 
     async function Swap(){
         let aux;
@@ -59,132 +62,135 @@ export default function Conversor(){
             }, 600);
     }
 
+    const Season = useCallback (
+        async(graphPeriod:string) => {
+            try {
+                let dateEnd:any = DateTime.now().setZone("system");
+                let dateStart:any, dateAmount: any, graphColor1: string, graphColor2: string, url: string, resData: Array<string>, newData: any, average: string;
+
+                setGraphMode(true);
+
+                switch(graphPeriod){
+                    case '1H':
+                        dateStart = dateEnd.minus({ days: 1 });
+                        dateAmount  = 54;
+                        dateStart = dateStart.toFormat('yyyyMMdd');
+                        dateEnd = dateEnd.toFormat('yyyyMMdd');
+                        graphColor1 = 'rgb(255,255,255)';
+                        graphColor2 = 'rgba(240,240,240,0.2)';
+                        break;
+                    case '15D':
+                        dateStart = dateEnd.minus({ days: 15 });
+                        dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+                        break;
+                    case '1M':
+                        dateStart = dateEnd.minus({ month: 1 });
+                        dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+                        break;
+                    case '3M':
+                        dateStart = dateEnd.minus({ month: 3 });
+                        dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+                        break;
+                    case '6M':
+                        dateStart = dateEnd.minus({ month: 6 });
+                        dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+                        break;
+                    case '1A':
+                        dateStart = dateEnd.minus({ year: 1 });
+                        dateAmount = dateEnd.diff(dateStart, 'days').values.days;
+                        break;
+                    default:
+                        alert('Atenção: Use apenas os valores válidos!');
+                }
+
+                (graphPeriod === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
+
+                fetch(url)
+                    .then( (e) => e.json()
+                        .then( data => {
+                            if(graphPeriod === '1H'){
+                                resData = ( data.map((e:any) => e.bid ))
+                                newData = data.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
+                            }else{
+                                resData = data.map((e:any) => e.high );
+                                newData = [newData, data[0]]; //return undefined value
+
+                                for(let i = 0 ; i < data.length-1 ; i++){
+                                    if(data[i].timestamp - data[i+1].timestamp > 1000){
+                                        newData = [...newData, data[i+1]];
+                                    }
+                                }
+                                newData = newData.filter(Boolean); //remove undefined value
+
+                                const total = newData.reduce( (prev:number, curr:any) => prev + Number(curr.high), 0)
+
+                                average = (total/newData.length).toFixed(4)
+
+                                if(newData[newData.length-1].high > average){
+                                    graphColor1 = 'rgb(95,255,76)';
+                                    graphColor2 = 'rgba(95,255,76,0.2)';
+                                }else{
+                                    graphColor1 = 'rgb(247,126,126)';
+                                    graphColor2 = 'rgba(247,126,126,0.2)';
+                                }
+
+                                resData = ( newData.map((e:any) => e.high ));
+                                resData = resData.map(str => {
+                                    if(resData[0] < '1'){
+                                        return Number(str).toFixed(4);
+                                    }else{
+                                        return Number(str).toFixed(2);
+                                    }
+                                })
+                                newData = newData.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
+                            }
+
+                            const APIGraph = {
+                                labels: newData,
+                                datasets: [{
+                                    label: 'Conversão',
+                                    fill: true,
+                                    lineTension: 0,
+                                    cubicInterpolationMode: 'monotone',
+                                    pointHitRadius: 5,
+                                    pointHoverBorderWidth: 4.5,
+                                    pointRadius: 1,
+                                    pointHoverRadius: 6,
+                                    backgroundColor: graphColor2,
+                                    borderColor: graphColor1,
+                                    pointHoverBackgroundColor: 'rgb(0,0,0)',
+                                    pointBorderColor: graphColor1,
+                                    pointBackgroundColor: graphColor1,
+                                    borderWidth: 2,
+                                    data: resData.reverse(),
+                                }]
+                            }
+                            setAPIGraph(APIGraph);
+
+                        })
+                    )
+            } catch(error) {
+                console.log(error);
+            }
+        },
+        [coinB_type, coinA_type]
+    );
+
+    if(loading){
+        <h1>Carregando...</h1>
+    }
+
     useEffect(() => {
         Converter(coinA_value);
 
         if(graphMode !== false || graphPeriod !== ''){
             Season(graphPeriod);
         }
-    }, [coinA_type, coinB_type, graphPeriod]);
+    }, [coinA_type, coinB_type, coinA_value, graphPeriod, graphMode, Converter, Season]);
 
 
     function Period(buttonValue:string){
         setGraphPeriod(buttonValue);
-    }
-
-    function Season(graphPeriod:string) {
-        try {
-            let dateEnd:any = DateTime.now().setZone("system");
-            let dateStart:any, dateAmount: any, graphColor1: string, graphColor2: string, url: string, resData: Array<string>, newData: any, average: string;
-
-            setGraphMode(true);
-
-            switch(graphPeriod){
-                case '1H':
-                    dateStart = dateEnd.minus({ days: 1 });
-                    dateAmount  = 54;
-                    dateStart = dateStart.toFormat('yyyyMMdd');
-                    dateEnd = dateEnd.toFormat('yyyyMMdd');
-                    graphColor1 = 'rgb(255,255,255)';
-                    graphColor2 = 'rgba(240,240,240,0.2)';
-                    break;
-                case '15D':
-                    dateStart = dateEnd.minus({ days: 15 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    break;
-                case '1M':
-                    dateStart = dateEnd.minus({ month: 1 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    break;
-                case '3M':
-                    dateStart = dateEnd.minus({ month: 3 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    break;
-                case '6M':
-                    dateStart = dateEnd.minus({ month: 6 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    break;
-                case '1A':
-                    dateStart = dateEnd.minus({ year: 1 });
-                    dateAmount = dateEnd.diff(dateStart, 'days').values.days;
-                    break;
-                default:
-                    alert('Atenção: Use apenas os valores válidos!');
-            }
-
-            (graphPeriod === '1H' ? url = `https://economia.awesomeapi.com.br/${coinA_type}-${coinB_type}/${dateAmount}?start_date=${dateStart}&end_date=${dateEnd}` : url = `https://economia.awesomeapi.com.br/json/daily/${coinA_type}-${coinB_type}/${dateAmount}`)
-
-            fetch(url)
-                .then( (e) => e.json()
-                    .then( data => {
-                        if(graphPeriod === '1H'){
-                            resData = ( data.map((e:any) => e.bid ))
-                            newData = data.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc, HH:mm:ss a'))
-                        }else{
-                            resData = data.map((e:any) => e.high );
-                            newData = [newData, data[0]]; //return undefined value
-
-                            for(let i = 0 ; i < data.length-1 ; i++){
-                                if(data[i].timestamp - data[i+1].timestamp > 1000){
-                                    newData = [...newData, data[i+1]];
-                                }
-                            }
-                            newData = newData.filter(Boolean); //remove undefined value
-
-                            const total = newData.reduce( (prev:number, curr:any) => prev + Number(curr.high), 0)
-
-                            average = (total/newData.length).toFixed(4)
-
-                            if(newData[newData.length-1].high > average){
-                                graphColor1 = 'rgb(95,255,76)';
-                                graphColor2 = 'rgba(95,255,76,0.2)';
-                            }else{
-                                graphColor1 = 'rgb(247,126,126)';
-                                graphColor2 = 'rgba(247,126,126,0.2)';
-                            }
-
-                            resData = ( newData.map((e:any) => e.high ));
-                            resData = resData.map(str => {
-                                if(resData[0] < '1'){
-                                    return Number(str).toFixed(4);
-                                }else{
-                                    return Number(str).toFixed(2);
-                                }
-                            })
-                            newData = newData.reverse().map((e:any) => DateTime.fromSeconds(Number(e.timestamp)).toFormat('ccc., dd MMM. yyyy'))
-                        }
-
-                        const APIGraph = {
-                            labels: newData,
-                            datasets: [{
-                                label: 'Conversão',
-                                fill: true,
-                                lineTension: 0,
-                                cubicInterpolationMode: 'monotone',
-                                pointHitRadius: 5,
-                                pointHoverBorderWidth: 4.5,
-                                pointRadius: 1,
-                                pointHoverRadius: 6,
-                                backgroundColor: graphColor2,
-                                borderColor: graphColor1,
-                                pointHoverBackgroundColor: 'rgb(0,0,0)',
-                                pointBorderColor: graphColor1,
-                                pointBackgroundColor: graphColor1,
-                                borderWidth: 2,
-                                data: resData.reverse(),
-                            }]
-                        }
-                        setAPIGraph(APIGraph);
-
-                    })
-                )
-        } catch(error) {
-            console.log(error);
-        }
-    }
-
-    if(loading){
-        <h1>Carregando...</h1>
     }
 
     // o useMemo foi utilizado para que não seja renderizado novamente ao mexer em coisas desvinculadas ao 'options'
@@ -208,6 +214,7 @@ export default function Conversor(){
                                 if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected !== 0 && !(key === coinB_type)) || (selected !== 1 )){
                                     return (<option value={key} key={key+"converter"}>{options[key]}</option>)
                                 }
+                                return null;
                             })}
                         </select>
 
@@ -257,8 +264,9 @@ export default function Conversor(){
                         >
                             {currencyList.map((key) => {
                                 if(((key === 'USD' || key === 'BRL' || key === 'EUR') && selected === 0 && !(key === coinA_type)) || (selected === 1 )){
-                                return (<option value={key} key={key+"converted"}>{options[key]}</option>)
+                                    return (<option value={key} key={key+"converted"}>{options[key]}</option>)
                                 }
+                                return null;
                             })}
                         </select>
                     </div>
