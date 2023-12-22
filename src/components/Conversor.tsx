@@ -30,14 +30,18 @@ export default function Conversor(){
             const from_to = `${coinA_type}${coinB_type}`
             const url = `https://economia.awesomeapi.com.br/json/last/${coinA_type}-${coinB_type}`
 
-        const quotation = await fetch(url)
-            .then((e) => e.json())
-            .then((e) => e[from_to].bid);
+            try {
+                const quotation = await fetch(url)
+                    .then((e) => e.json())
+                    .then((e) => e[from_to].bid);
 
-            if (inputValue === "") {
-                setCoinB_value('');
-            } else {
-                setCoinB_value(( (parseFloat as any) ((inputValue as number) * quotation).toFixed(2) ))
+                if (inputValue === "") {
+                    setCoinB_value('');
+                } else {
+                    setCoinB_value(( (parseFloat as any) ((inputValue as number) * quotation).toFixed(2) ))
+                }
+            } catch (error) {
+                console.error(error)
             }
         },
         [coinA_type, coinB_type]
@@ -195,7 +199,8 @@ export default function Conversor(){
 
     // o useMemo foi utilizado para que não seja renderizado novamente ao mexer em coisas desvinculadas ao 'options'
     const currencyList = useMemo(() => {
-        return Object.keys(options || {});
+        const messyList = Object.keys(options || {});
+        return messyList.sort((a, b) => options[a].localeCompare(options[b]));
     }, [options])
 
         return (
@@ -291,7 +296,7 @@ export default function Conversor(){
 
                 </div>
 
-                <div id="graph-res" className='flex flex-wrap w-9/12 justify-center max-xl:w-11/12 max-sm:w-full'>
+                <div id="graph-res" className='flex flex-wrap w-70% justify-center max-xl:w-11/12 max-sm:w-full'>
                     { APIGraph !== null ? (< Line data = {APIGraph} />) : <h4> Selecione uma das opções acima! </h4>}
                 </div>
 

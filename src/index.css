@@ -6,7 +6,7 @@
 @layer components {
 
     html {
-        @apply h-screen bg-gradient-to-b from-stone-900 to-gray-900;
+        @apply min-h-screen bg-gradient-to-b from-stone-900 to-gray-900;
     }
 
     h1, h3, h4 {

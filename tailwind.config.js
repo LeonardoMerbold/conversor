@@ -3,6 +3,9 @@ module.exports = {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      width: {
+        '70%': '70%',
+      },
       keyframes: {
         press: {
           '0%, 100%': { transform: 'translateY(8%)' },
